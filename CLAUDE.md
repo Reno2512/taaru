@@ -6,9 +6,9 @@ Avant toute tâche, lis `docs/produit.md` (périmètre et écrans) et `docs/memo
 
 ## Stack
 
-- Next.js (App Router) + TypeScript strict
+- Next.js 16 (App Router) + TypeScript strict. Cette version change des conventions (`middleware` devient `src/proxy.ts`, API de requête asynchrones) : lis `AGENTS.md` et la doc de `node_modules/next/dist/docs/` avant d'écrire du code Next.js
 - Tailwind CSS + shadcn/ui
-- Supabase : PostgreSQL, Auth, Storage. Le schéma de référence est `supabase/schema.sql`
+- Supabase : PostgreSQL, Auth, Storage. Le schéma de référence est la suite des migrations de `supabase/migrations/`
 - React Hook Form + Zod (le même schéma Zod valide côté client et côté serveur)
 - Déploiement Vercel. Erreurs : Sentry. Analytics : PostHog
 

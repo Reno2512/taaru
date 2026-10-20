@@ -1,4 +1,4 @@
--- Atelier de couture : schéma Supabase (PostgreSQL)
+-- Migration initiale : schéma de l'atelier de couture (Supabase / PostgreSQL)
 -- Multi-atelier : chaque donnée métier porte atelier_id, et la RLS limite
 -- chaque utilisateur aux ateliers dont il est membre.
 -- Montants en FCFA, stockés en entiers (pas de centimes).
@@ -292,3 +292,16 @@ insert into measurement_templates (atelier_id, name, fields) values
   {"key":"longueur_haut","label":"Longueur du haut","unit":"cm"},
   {"key":"longueur_bas","label":"Longueur du bas","unit":"cm"}
 ]');
+
+-- ─── Droits d'accès via l'API Supabase ───────────────────────────────────
+-- Explicites pour ne pas dépendre du réglage « auto_expose_new_tables » du projet.
+-- Seuls les utilisateurs connectés reçoivent des droits ; la RLS filtre ensuite ligne par ligne.
+grant usage on schema public to authenticated;
+grant usage on type member_role, item_status, payment_method, payment_kind, fabric_source to authenticated;
+grant select, insert, update, delete on
+  ateliers, memberships, customers, measurement_templates, measurements,
+  orders, order_items, payments
+to authenticated;
+grant select on item_events, subscriptions, order_balances to authenticated;
+grant execute on function create_atelier(text, text, text) to authenticated;
+revoke execute on function create_atelier(text, text, text) from public, anon;
