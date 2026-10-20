@@ -1,0 +1,256 @@
+<title>Dossier Atelier Couture</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@600;800&family=Work+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout : colonne de lecture, ruban de mètre ruban comme séparateur, maquette de téléphone à côté du MVP */
+:root {
+  --bg: #F5F6FA; --surface: #FFFFFF; --ink: #161B33; --muted: #5A6080; --line: #DCDFEA;
+  --indigo: #2C3A8C; --indigo-soft: #E5E8F6; --tape: #F2C230; --tape-ink: #4A3A00;
+  --ok: #1D8754; --ok-soft: #DFF2E8; --warn: #B4541A; --warn-soft: #FBE9DD;
+  --f-display: "Syne", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0E1122; --surface: #171B33; --ink: #E9EBF5; --muted: #A0A6C4; --line: #2A3052;
+  --indigo: #9AA8FF; --indigo-soft: #222A55; --tape: #E8B923; --tape-ink: #2A2000;
+  --ok: #52C98E; --ok-soft: #133224; --warn: #F0965A; --warn-soft: #3A2414; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0E1122; --surface: #171B33; --ink: #E9EBF5; --muted: #A0A6C4; --line: #2A3052;
+  --indigo: #9AA8FF; --indigo-soft: #222A55; --tape: #E8B923; --tape-ink: #2A2000;
+  --ok: #52C98E; --ok-soft: #133224; --warn: #F0965A; --warn-soft: #3A2414; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15.5px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 920px; margin: 0 auto; padding-block: 40px 80px; display: grid; gap: 52px }
+h1, h2, h3 { font-family: var(--f-display); line-height: 1.12; margin: 0; text-wrap: balance }
+h1 { font-size: clamp(32px, 7vw, 52px); font-weight: 800; letter-spacing: -0.02em }
+h2 { font-size: 26px; font-weight: 800 }
+h3 { font-size: 16px; font-weight: 600; font-family: var(--f-body) }
+p { margin: 0; max-width: 66ch }
+.muted { color: var(--muted) }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--indigo) }
+code { font: 13px var(--f-mono); background: var(--indigo-soft); padding: 1px 5px; border-radius: 4px }
+section { display: grid; gap: 16px }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px }
+
+/* Mètre ruban */
+.tape { height: 28px; border-radius: 3px; background-color: var(--tape); color: var(--tape-ink);
+  background-image:
+    repeating-linear-gradient(90deg, var(--tape-ink) 0 1px, transparent 1px 10px),
+    repeating-linear-gradient(90deg, var(--tape-ink) 0 1.5px, transparent 1.5px 50px);
+  background-size: 100% 7px, 100% 13px; background-repeat: no-repeat; background-position: 0 0, 0 0;
+  display: flex; align-items: flex-end; justify-content: space-between; padding: 0 6px 3px; font: 500 10px var(--f-mono); overflow: hidden }
+
+header.hero { display: grid; gap: 14px }
+.lede { font-size: 18px; color: var(--muted) }
+.names { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; color: var(--muted) }
+.chip { font: 500 13px var(--f-mono); padding: 4px 9px; border: 1px solid var(--line); border-radius: 99px; color: var(--ink); background: var(--surface) }
+
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 6px; align-content: start; min-width: 0 }
+.card p, .card li { font-size: 14.5px; color: var(--muted) }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 3px }
+.pains { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px }
+.pain { border-left: 3px solid var(--tape); padding: 2px 0 2px 12px }
+.pain b { display: block; font-weight: 600 }
+.pain span { font-size: 14px; color: var(--muted) }
+
+/* MVP + maquette */
+.mvp { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 28px; align-items: start }
+.feat { display: grid; gap: 0 }
+.feat div { display: grid; grid-template-columns: 22px 1fr; gap: 10px; padding: 10px 0; border-top: 1px solid var(--line) }
+.feat div:first-child { border-top: 0 }
+.feat i { font-style: normal; color: var(--indigo); font-weight: 600 }
+.feat p { font-size: 14.5px; color: var(--muted) }
+.feat b { color: var(--ink); font-weight: 600 }
+.later { font-size: 14px; color: var(--muted) }
+
+.phone { width: 100%; max-width: 300px; justify-self: center; border: 8px solid var(--ink); border-radius: 30px; background: var(--bg); overflow: hidden; font-size: 13px }
+.phone .bar { background: var(--indigo); color: #fff; padding: 14px 14px 12px; display: grid; gap: 2px }
+.phone .bar small { opacity: .8; font-size: 11px }
+.phone .bar strong { font: 800 17px var(--f-display) }
+.phone .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px }
+.phone .kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px }
+.phone .kpi small { display: block; color: var(--muted); font-size: 11px }
+.phone .kpi b { font: 600 15px var(--f-body); font-variant-numeric: tabular-nums }
+.phone .list { padding: 0 10px 10px; display: grid; gap: 8px }
+.phone .row { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 10px; display: grid; grid-template-columns: 1fr auto; gap: 2px 8px }
+.phone .row span { color: var(--muted); font-size: 11.5px }
+.pill { font: 500 10.5px var(--f-mono); padding: 3px 7px; border-radius: 99px; align-self: start; white-space: nowrap }
+.pill.ready { background: var(--ok-soft); color: var(--ok) }
+.pill.late { background: var(--warn-soft); color: var(--warn) }
+.pill.work { background: var(--indigo-soft); color: var(--indigo) }
+.phone .cta { margin: 0 10px 12px; text-align: center; background: var(--ink); color: var(--bg); border-radius: 10px; padding: 11px; font-weight: 600 }
+.phone .note { text-align: center; font: 10px var(--f-mono); color: var(--muted); padding-bottom: 10px }
+
+/* Statuts */
+.flow { display: flex; flex-wrap: wrap; gap: 6px; align-items: center }
+.flow span { font: 500 13px var(--f-mono); padding: 6px 10px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line) }
+.flow em { color: var(--muted); font-style: normal }
+
+.scroll { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px }
+th, td { text-align: left; padding: 10px 14px; border-bottom: 1px solid var(--line); vertical-align: top }
+th { font: 500 12px var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+tr:last-child td { border-bottom: 0 }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 600 }
+pre.mermaid { margin: 0; padding: 16px; background: var(--surface); text-align: center }
+
+.timeline { display: grid }
+.step { display: grid; grid-template-columns: 170px 1fr; gap: 14px; padding: 12px 0; border-top: 1px solid var(--line) }
+.step .when { font: 500 13px var(--f-mono); color: var(--indigo) }
+.step p { font-size: 14.5px; color: var(--muted) }
+.step b { color: var(--ink) }
+.step.key .when { color: var(--warn) }
+
+.files { display: grid; gap: 0; font-size: 14.5px }
+.files div { display: grid; grid-template-columns: minmax(0, 220px) 1fr; gap: 12px; padding: 8px 0; border-top: 1px solid var(--line) }
+.files code { background: none; padding: 0; color: var(--indigo); word-break: break-all }
+.files span { color: var(--muted) }
+
+@media (max-width: 720px) {
+  .mvp { grid-template-columns: 1fr }
+  .step, .files div { grid-template-columns: 1fr; gap: 2px }
+}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <span class="eyebrow">Dossier de lancement · Sénégal</span>
+    <h1>Le cahier de l'atelier, dans le téléphone</h1>
+    <p class="lede">Un SaaS pour les ateliers de couture : mesures, commandes, tenues prêtes, acomptes et soldes, avec les messages WhatsApp aux clients déjà rédigés.</p>
+    <div class="names">Noms provisoires à vérifier : <span class="chip">Taaru</span><span class="chip">Mesuro</span><span class="chip">Atelyé</span></div>
+    <div class="tape" aria-hidden="true"><span>0</span><span>10</span><span>20</span><span>30</span><span>40</span><span>50</span><span>60</span><span>70</span><span>80</span><span>90</span></div>
+  </header>
+
+  <section>
+    <span class="eyebrow">Le problème</span>
+    <h2>Ce que coûte le cahier aujourd'hui</h2>
+    <div class="pains">
+      <div class="pain"><b>Mesures perdues</b><span>Cahier abîmé, page illisible : on reprend le client, ou on rate la tenue.</span></div>
+      <div class="pain"><b>Tenues en retard</b><span>Avant la Korité et la Tabaski, des dizaines de commandes sans vue d'ensemble.</span></div>
+      <div class="pain"><b>Acomptes oubliés</b><span>« J'ai déjà donné 10 000 » : disputes sur le reste à payer.</span></div>
+      <div class="pain"><b>Aucun chiffre</b><span>Le patron ne sait pas ce que l'atelier encaisse ni ce qu'on lui doit.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Pour qui</span>
+    <h2>Les personnes à servir</h2>
+    <div class="grid2">
+      <div class="card"><h3>Le maître tailleur · cible n° 1</h3><p>Atelier de 2 à 10 personnes, Android, WhatsApp toute la journée, encaisse avec Wave. Veut ne plus rien oublier et tenir les délais du rush.</p></div>
+      <div class="card"><h3>Le tailleur seul</h3><p>Petit budget, besoin d'un carnet de mesures fiable et de rappels clients. Entrée par l'offre gratuite.</p></div>
+      <div class="card"><h3>Le créateur ou styliste</h3><p>Marque sur Instagram et TikTok, clients aussi dans la diaspora. Veut une image professionnelle et suivre ses commandes à distance.</p></div>
+      <div class="card"><h3>Le client</h3><p>N'installe rien. Reçoit le récapitulatif, le message « tenue prête » et le reste à payer sur WhatsApp.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">MVP · 8 semaines</span>
+    <h2>Ce que fait la première version</h2>
+    <div class="mvp">
+      <div class="feat">
+        <div><i>1</i><p><b>Clients et mesures.</b> Fiches femme, homme et enfant, historique daté, modèles personnalisables.</p></div>
+        <div><i>2</i><p><b>Nouvelle commande en moins d'une minute.</b> Client, une ou plusieurs tenues avec photo du modèle et du tissu, prix, date, acompte.</p></div>
+        <div><i>3</i><p><b>Suivi des tenues en un geste.</b> Chaque tenue avance à son rythme, l'historique garde qui a fait quoi.</p></div>
+        <div><i>4</i><p><b>Acomptes et soldes.</b> Espèces, Wave, Orange Money. Le reste à payer est toujours affiché.</p></div>
+        <div><i>5</i><p><b>Messages WhatsApp prêts.</b> Confirmation, « tenue prête », rappel de solde, via un lien pré-rempli et sans coût d'API.</p></div>
+        <div><i>6</i><p><b>Tableau de bord.</b> Livraisons du jour, retards, encaissé et à encaisser. Reçu PDF à partager.</p></div>
+        <div><i>7</i><p><b>Équipe.</b> Propriétaire, tailleurs, apprentis. Les apprentis ne voient pas l'argent.</p></div>
+        <p class="later">Après le lancement : hors ligne complet, lien de paiement Wave par commande, messages automatiques, planning du rush, catalogue de modèles, stock de tissus, interface en wolof.</p>
+      </div>
+      <div class="phone" role="img" aria-label="Maquette de l'écran d'accueil sur téléphone, avec des données d'exemple">
+        <div class="bar"><small>Mardi 9 mars</small><strong>Atelier Ndèye</strong></div>
+        <div class="kpis">
+          <div class="kpi"><small>À livrer aujourd'hui</small><b>3 tenues</b></div>
+          <div class="kpi"><small>En retard</small><b>1</b></div>
+          <div class="kpi"><small>Encaissé ce mois</small><b>412 000</b></div>
+          <div class="kpi"><small>Reste à encaisser</small><b>186 500</b></div>
+        </div>
+        <div class="list">
+          <div class="row"><b>C-0142 · Awa D.</b><span class="pill ready">prête</span><span>Taille basse · reste 15 000 FCFA</span></div>
+          <div class="row"><b>C-0139 · Moussa F.</b><span class="pill late">en retard</span><span>Grand boubou · finition</span></div>
+          <div class="row"><b>C-0145 · Fatou S.</b><span class="pill work">couture</span><span>3 tenues enfants · soldé</span></div>
+        </div>
+        <div class="cta">+ Nouvelle commande</div>
+        <div class="note">données d'exemple</div>
+      </div>
+    </div>
+    <div class="flow" aria-label="Statuts d'une tenue">
+      <span>reçu</span><em>→</em><span>coupe</span><em>→</em><span>couture</span><em>→</em><span>finition</span><em>→</em><span>prête</span><em>→</em><span>livrée</span>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Données</span>
+    <h2>Le modèle de données, déjà testé</h2>
+    <p class="muted">Toutes les tables portent <code>atelier_id</code> et la Row Level Security isole chaque atelier. Testé sur PostgreSQL 16 : un autre atelier ne voit rien et ne peut rien écrire, un apprenti ne voit aucun paiement, les numéros de commande se suivent par atelier et chaque changement de statut est historisé.</p>
+    <div class="scroll"><pre class="mermaid">
+erDiagram
+  ATELIERS ||--o{ MEMBERSHIPS : "équipe"
+  ATELIERS ||--o{ CUSTOMERS : "clients"
+  CUSTOMERS ||--o{ MEASUREMENTS : "mesures datées"
+  MEASUREMENT_TEMPLATES ||--o{ MEASUREMENTS : "modèle"
+  CUSTOMERS ||--o{ ORDERS : "commandes"
+  ORDERS ||--|{ ORDER_ITEMS : "tenues"
+  ORDER_ITEMS ||--o{ ITEM_EVENTS : "historique"
+  ORDERS ||--o{ PAYMENTS : "acomptes, soldes"
+  ATELIERS ||--|| SUBSCRIPTIONS : "abonnement"
+</pre></div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Modèle économique</span>
+    <h2>Tarifs à valider en interview</h2>
+    <div class="scroll"><table>
+      <thead><tr><th>Offre</th><th>Prix</th><th>Contenu</th></tr></thead>
+      <tbody>
+        <tr><td><b>Gratuit</b></td><td class="num">0 FCFA</td><td>1 utilisateur, 30 clients, 10 commandes en cours</td></tr>
+        <tr><td><b>Atelier</b></td><td class="num">5 000 FCFA / mois</td><td>Clients et commandes illimités, reçus PDF, 3 utilisateurs</td></tr>
+        <tr><td><b>Pro</b></td><td class="num">12 000 FCFA / mois</td><td>Équipe illimitée, planning du rush, statistiques, lien de paiement</td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">Annuel : 2 mois offerts. Abonnement payé par Wave ou Orange Money via un agrégateur. Repère : 100 ateliers en offre Atelier représentent 500 000 FCFA de MRR.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Calendrier</span>
+    <h2>Caler le lancement sur le rush</h2>
+    <div class="timeline">
+      <div class="step"><span class="when">Fin oct. → mi-nov. 2026</span><p><b>Validation.</b> 15 interviews d'ateliers, maquette cliquable, au moins 5 précommandes.</p></div>
+      <div class="step"><span class="when">Mi-nov. 2026 → mi-janv. 2027</span><p><b>Construction du MVP</b> selon le plan en 8 semaines.</p></div>
+      <div class="step"><span class="when">Mi-janv. → fév. 2027</span><p><b>Pilote</b> avec 10 ateliers, corrections chaque semaine.</p></div>
+      <div class="step key"><span class="when">Korité · début mars 2027</span><p><b>Premier rush réel.</b> On mesure la charge et la stabilité.</p></div>
+      <div class="step key"><span class="when">Tabaski · mi-mai 2027</span><p><b>Lancement public.</b> Objectif : 100 ateliers actifs.</p></div>
+    </div>
+    <p class="muted">Les dates de la Korité et de la Tabaski sont approximatives et dépendent du calendrier lunaire.</p>
+  </section>
+
+  <section>
+    <span class="eyebrow">Acquisition</span>
+    <h2>Trouver les premiers ateliers</h2>
+    <div class="grid2">
+      <div class="card"><h3>Terrain</h3><p>Démo sur téléphone dans les ateliers, et saisie de leurs 20 premiers clients avec eux pour lever la barrière de départ.</p></div>
+      <div class="card"><h3>Vendeurs de tissus</h3><p>Ils voient passer tous les tailleurs : partenariat et commission sur les abonnements apportés.</p></div>
+      <div class="card"><h3>Contenu</h3><p>Vidéos TikTok et Instagram « avant / après le cahier » pendant le rush.</p></div>
+      <div class="card"><h3>Viralité intégrée</h3><p>Chaque reçu et chaque message client porte « Géré avec [nom] ». Un mois offert par atelier parrainé.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <span class="eyebrow">Fichiers du projet</span>
+    <h2>Prêts pour Claude Code</h2>
+    <div class="files">
+      <div><code>CLAUDE.md</code><span>Règles pour l'agent : stack, interface mobile, sécurité, méthode page par page</span></div>
+      <div><code>docs/produit.md</code><span>Problème, personas, MVP, écrans, tarifs, risques</span></div>
+      <div><code>docs/interviews.md</code><span>Script d'interview Mom Test et critères pour continuer</span></div>
+      <div><code>docs/plan.md</code><span>Construction en 8 semaines et parcours testés en E2E</span></div>
+      <div><code>docs/memory.md</code><span>État du projet, tenu à jour par l'agent</span></div>
+      <div><code>supabase/schema.sql</code><span>Tables, RLS, stockage des photos, modèles de mesures</span></div>
+    </div>
+  </section>
+</div>

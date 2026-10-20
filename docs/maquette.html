@@ -1,0 +1,632 @@
+<title>Maquette Taaru</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Work+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout : un téléphone au centre (plein écran sur mobile), notes d'interview à côté sur grand écran */
+:root {
+  --page: #E9EBF3; --bg: #F5F6FA; --surface: #FFFFFF; --ink: #161B33; --muted: #5A6080; --line: #DCDFEA;
+  --indigo: #2C3A8C; --indigo-ink: #FFFFFF; --indigo-soft: #E5E8F6; --tape: #F2C230; --tape-ink: #3D3000;
+  --ok: #1D8754; --ok-soft: #DFF2E8; --warn: #B4541A; --warn-soft: #FBE9DD; --wa: #1E9E57;
+  --f-display: "Syne", "Segoe UI", system-ui, sans-serif;
+  --f-body: "Work Sans", "Segoe UI", system-ui, sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --page: #090B17; --bg: #0E1122; --surface: #171B33; --ink: #E9EBF5; --muted: #A0A6C4; --line: #2A3052;
+  --indigo: #7F8FF0; --indigo-ink: #0E1122; --indigo-soft: #222A55; --tape: #E8B923; --tape-ink: #2A2000;
+  --ok: #52C98E; --ok-soft: #133224; --warn: #F0965A; --warn-soft: #3A2414; --wa: #3CC57A; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --page: #090B17; --bg: #0E1122; --surface: #171B33; --ink: #E9EBF5; --muted: #A0A6C4; --line: #2A3052;
+  --indigo: #7F8FF0; --indigo-ink: #0E1122; --indigo-soft: #222A55; --tape: #E8B923; --tape-ink: #2A2000;
+  --ok: #52C98E; --ok-soft: #133224; --warn: #F0965A; --warn-soft: #3A2414; --wa: #3CC57A; color-scheme: dark }
+
+* { box-sizing: border-box }
+[hidden] { display: none !important }
+html, body { height: 100% }
+body { background: var(--page); color: var(--ink); font: 15px/1.45 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+button, input { font: inherit; color: inherit }
+button { cursor: pointer }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--indigo); outline-offset: 2px }
+
+.stage { min-height: 100%; display: flex; flex-wrap: wrap; gap: 40px; align-items: center; justify-content: center; padding-block: 28px }
+.notes { max-width: 340px; display: grid; gap: 14px; min-width: 0 }
+.notes h1 { font: 800 30px/1.1 var(--f-display); margin: 0 }
+.notes p, .notes li { color: var(--muted); margin: 0 }
+.notes ol { margin: 0; padding-left: 20px; display: grid; gap: 6px }
+.notes .tag { font: 500 11px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--indigo) }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--indigo); text-decoration: underline; font-weight: 600 }
+
+/* Téléphone */
+.device { width: 390px; max-width: 100%; height: 800px; max-height: calc(100vh - 56px); min-height: 560px;
+  border: 10px solid var(--ink); border-radius: 38px; background: var(--bg); overflow: hidden; position: relative;
+  display: flex; flex-direction: column; box-shadow: 0 30px 60px -30px rgba(10, 14, 40, .45) }
+@media (max-width: 480px) {
+  body { padding-left: 0; padding-right: 0 }
+  .stage { padding: 0; gap: 0; display: block }
+  .device { width: 100%; height: 100%; max-height: none; min-height: 0; border: 0; border-radius: 0; box-shadow: none }
+  .notes { display: none }
+}
+.screen { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 96px }
+.screen.with-footer { padding-bottom: 170px }
+
+/* En-têtes */
+.top { background: var(--indigo); color: var(--indigo-ink); padding: 18px 18px 16px; display: flex; align-items: flex-end; justify-content: space-between; gap: 12px }
+.top small { display: block; opacity: .85; font-size: 12.5px; text-transform: capitalize }
+.top h2 { font: 800 21px/1.1 var(--f-display); margin: 2px 0 0 }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--tape); color: var(--tape-ink); display: grid; place-items: center; font-weight: 700; flex: none }
+.bar { position: sticky; top: 0; z-index: 3; background: var(--bg); display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line) }
+.bar h2 { font: 700 17px var(--f-body); margin: 0; flex: 1; min-width: 0 }
+.iconbtn { width: 40px; height: 40px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; font-size: 18px; flex: none }
+
+/* Accueil */
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; text-align: left; display: grid; gap: 2px }
+.kpi small { color: var(--muted); font-size: 12px }
+.kpi b { font-size: 19px; font-variant-numeric: tabular-nums }
+.kpi.alert b { color: var(--warn) }
+.kpi.money b { font-size: 16px }
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 14px 12px; scrollbar-width: none }
+.chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 99px; padding: 8px 13px; font-size: 13.5px; font-weight: 500 }
+.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.list { display: grid; gap: 10px; padding: 0 14px }
+.order { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; text-align: left; display: grid; grid-template-columns: 46px 1fr auto; gap: 4px 12px; align-items: center; width: 100% }
+.order .sw { grid-row: span 2 }
+.order b { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.order .sub { grid-column: 2 / 4; color: var(--muted); font-size: 13px; display: flex; justify-content: space-between; gap: 8px }
+.order .sub strong { color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap }
+.empty { text-align: center; color: var(--muted); padding: 30px 20px; display: grid; gap: 6px }
+
+/* Échantillon de tissu (quand pas de photo) */
+.sw { width: 46px; height: 46px; border-radius: 10px; flex: none; background-size: cover; background-position: center; border: 1px solid var(--line) }
+
+.pill { font: 500 11px var(--f-mono); padding: 4px 8px; border-radius: 99px; white-space: nowrap; justify-self: end }
+.pill.ready { background: var(--ok-soft); color: var(--ok) }
+.pill.late { background: var(--warn-soft); color: var(--warn) }
+.pill.work { background: var(--indigo-soft); color: var(--indigo) }
+.pill.done { background: var(--bg); color: var(--muted); border: 1px solid var(--line) }
+
+.fab { position: absolute; left: 14px; right: 14px; bottom: 76px; z-index: 4; background: var(--ink); color: var(--bg); border: 0; border-radius: 14px; padding: 15px; font-weight: 700; font-size: 16px; box-shadow: 0 10px 24px -12px rgba(10, 14, 40, .6) }
+.nav { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px) }
+.nav button { background: none; border: 0; padding: 9px 0 10px; display: grid; gap: 2px; justify-items: center; font-size: 11.5px; color: var(--muted) }
+.nav button span { font-size: 19px; line-height: 1 }
+.nav button[aria-current="page"] { color: var(--indigo); font-weight: 600 }
+
+/* Formulaires */
+.section { padding: 16px 14px 4px; display: grid; gap: 10px }
+.section > h3 { font: 600 12px var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 }
+.field { display: grid; gap: 5px }
+.field label { font-size: 13px; color: var(--muted); font-weight: 500 }
+.input { width: 100%; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 12px; font-size: 16px; min-height: 48px }
+.input.money { font-variant-numeric: tabular-nums; font-weight: 600 }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; display: grid; gap: 10px }
+.pick { display: flex; flex-wrap: wrap; gap: 7px }
+.pick button { border: 1px solid var(--line); background: var(--bg); border-radius: 9px; padding: 8px 11px; font-size: 13.5px }
+.pick button[aria-pressed="true"] { background: var(--indigo); color: var(--indigo-ink); border-color: var(--indigo); font-weight: 600 }
+.results { display: grid; gap: 6px }
+.result { display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px }
+.result small { color: var(--muted) }
+.selected { display: flex; align-items: center; gap: 12px; background: var(--indigo-soft); border-radius: 12px; padding: 12px }
+.selected div { flex: 1; min-width: 0 }
+.selected small { color: var(--muted); display: block }
+.ghost { border: 1px dashed var(--line); background: none; border-radius: 10px; padding: 12px; font-weight: 600; color: var(--indigo) }
+.photo { display: flex; align-items: center; gap: 12px }
+.photo label { border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 13.5px; font-weight: 500; background: var(--bg); cursor: pointer }
+.photo input { position: absolute; width: 1px; height: 1px; opacity: 0 }
+.photo .sw { width: 56px; height: 56px }
+.itemhead { display: flex; align-items: center; justify-content: space-between }
+.itemhead b { font-size: 14px }
+.remove { background: none; border: 0; color: var(--warn); font-size: 13px; font-weight: 600; padding: 4px }
+
+.footer { position: absolute; left: 0; right: 0; bottom: 0; z-index: 4; background: var(--surface); border-top: 1px solid var(--line); padding: 12px 14px calc(12px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px }
+.sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; text-align: center }
+.sum small { display: block; color: var(--muted); font-size: 11.5px }
+.sum b { font-variant-numeric: tabular-nums; font-size: 14.5px }
+.sum .rest b { color: var(--warn) }
+.primary { border: 0; background: var(--ink); color: var(--bg); border-radius: 12px; padding: 14px; font-weight: 700; font-size: 16px; width: 100% }
+.primary:disabled { opacity: .45; cursor: not-allowed }
+.hint { font-size: 12.5px; color: var(--muted); text-align: center; margin: 0 }
+
+/* Détail */
+.client { display: flex; align-items: center; gap: 12px; padding: 14px }
+.client div { flex: 1; min-width: 0 }
+.client b { font-size: 17px }
+.client small { display: block; color: var(--muted); user-select: all }
+.btnrow { display: flex; gap: 8px; padding: 0 14px 6px; flex-wrap: wrap }
+.soft { border: 1px solid var(--line); background: var(--surface); border-radius: 10px; padding: 10px 12px; font-weight: 600; font-size: 13.5px }
+.wa { background: var(--wa); color: #FFFFFF; border-color: var(--wa) }
+.meta { display: flex; justify-content: space-between; align-items: center; padding: 6px 14px 4px; color: var(--muted); font-size: 13.5px }
+.meta strong { color: var(--ink) }
+.garment { display: grid; grid-template-columns: 56px 1fr; gap: 12px }
+.garment .sw { width: 56px; height: 56px }
+.garment b { display: flex; justify-content: space-between; gap: 8px }
+.garment b span { font-variant-numeric: tabular-nums; font-weight: 600 }
+.garment small { color: var(--muted) }
+.steps { display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; grid-column: 1 / 3 }
+.steps i { height: 6px; border-radius: 3px; background: var(--line) }
+.steps i.on { background: var(--indigo) }
+.steps.done i.on { background: var(--ok) }
+.steplbl { grid-column: 1 / 3; display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; color: var(--muted) }
+.steplbl strong { color: var(--ink) }
+.advance { border: 0; background: var(--indigo); color: var(--indigo-ink); border-radius: 10px; padding: 10px 12px; font-weight: 600; font-size: 13.5px; white-space: nowrap }
+.advance.ok { background: var(--ok); color: #FFFFFF }
+.money-card { display: grid; gap: 8px }
+.pay { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); gap: 8px }
+.pay b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600 }
+.restline { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 10px }
+.restline b { font: 800 22px var(--f-display); font-variant-numeric: tabular-nums }
+.restline b.zero { color: var(--ok) }
+.restline b.due { color: var(--warn) }
+
+/* Feuille du bas */
+.backdrop { position: absolute; inset: 0; z-index: 10; background: rgba(10, 14, 40, .45); display: flex; align-items: flex-end }
+.sheet { background: var(--surface); width: 100%; border-radius: 20px 20px 0 0; padding: 10px 16px calc(18px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 12px; max-height: 88%; overflow-y: auto }
+.sheet .grab { width: 40px; height: 4px; border-radius: 2px; background: var(--line); justify-self: center }
+.sheet h3 { font: 800 19px var(--f-display); margin: 0 }
+.sheet p { margin: 0; color: var(--muted) }
+.msg { width: 100%; min-height: 170px; border: 1px solid var(--line); border-radius: 12px; padding: 12px; background: var(--bg); font: 14.5px/1.5 var(--f-body); resize: vertical }
+.walink { display: block; text-align: center; text-decoration: none; background: var(--wa); color: #FFFFFF; border-radius: 12px; padding: 14px; font-weight: 700 }
+.measures { display: grid; grid-template-columns: 1fr auto; gap: 0; font-size: 14.5px }
+.measures div { display: contents }
+.measures span, .measures b { padding: 8px 0; border-bottom: 1px solid var(--line) }
+.measures b { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--f-mono); font-weight: 500 }
+.receipt { border: 1px dashed var(--muted); border-radius: 6px; padding: 16px; display: grid; gap: 6px; font-size: 14px; background: var(--bg) }
+.receipt .rh { text-align: center; display: grid; gap: 2px; padding-bottom: 8px; border-bottom: 1px dashed var(--line) }
+.receipt .rh b { font: 800 17px var(--f-display) }
+.receipt .ln { display: flex; justify-content: space-between; gap: 8px }
+.receipt .ln b { font-variant-numeric: tabular-nums }
+.receipt .tot { border-top: 1px dashed var(--line); padding-top: 6px }
+.receipt .foot { text-align: center; font: 500 11px var(--f-mono); color: var(--muted); padding-top: 6px }
+
+.toast { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 20; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 500; width: max-content; max-width: calc(100% - 28px); text-align: center }
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: up .22s ease-out }
+  @keyframes up { from { transform: translateY(30px); opacity: .6 } to { transform: none; opacity: 1 } }
+}
+</style>
+
+<div class="stage">
+  <div class="device" id="device">
+    <div class="screen" id="screen"></div>
+    <div id="chrome"></div>
+    <div class="backdrop" id="backdrop" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+    <div class="toast" id="toast" role="status" hidden></div>
+  </div>
+  <aside class="notes">
+    <span class="tag">Maquette d'interview · données fictives</span>
+    <h1>Taaru, l'atelier dans le téléphone</h1>
+    <p>Trois écrans à faire tester par le tailleur, sur votre téléphone, sans rien expliquer d'abord.</p>
+    <ol>
+      <li><b>Accueil</b> : « Quelles tenues devez-vous livrer aujourd'hui ? »</li>
+      <li><b>Nouvelle commande</b> : « Enregistrez la commande d'une cliente qui veut deux tenues pour la Tabaski. »</li>
+      <li><b>Détail</b> : « La tenue est prête : prévenez la cliente et encaissez le solde. »</li>
+    </ol>
+    <p>Notez où le tailleur hésite, ce qu'il cherche sans le trouver, et les mots qu'il emploie.</p>
+    <p><button class="linkbtn" id="reset-demo" type="button">Remettre la maquette à zéro</button></p>
+  </aside>
+</div>
+
+<script>
+// ─── Données de démonstration (fictives) ─────────────────────────────────
+const ATELIER = "Atelier Ndèye";
+const APP = "Taaru";
+const STEPS = [["recu", "Reçu"], ["coupe", "Coupe"], ["couture", "Couture"], ["finition", "Finition"], ["pret", "Prête"], ["livre", "Livrée"]];
+const GARMENTS = ["Taille basse", "Grand boubou", "Robe", "Caftan", "Ensemble", "Tenue enfant", "Pantalon", "Autre"];
+const METHODS = { especes: "Espèces", wave: "Wave", om: "Orange Money" };
+const FABRICS = [["#2C3A8C", "#F2C230"], ["#B4541A", "#F7E3C6"], ["#1D8754", "#F2C230"], ["#7A1F4D", "#F4D7E4"], ["#0F6A73", "#E7F3F1"], ["#3D2B1F", "#E8C07A"]];
+const STORE_KEY = "taaru-maquette-v1";
+
+const pad = n => String(n).padStart(2, "0");
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const TODAY = new Date(); TODAY.setHours(0, 0, 0, 0);
+const day = n => { const d = new Date(TODAY); d.setDate(d.getDate() + n); return ymd(d); };
+const parse = s => { const [y, m, d] = s.split("-").map(Number); return new Date(y, m - 1, d); };
+const diffDays = s => Math.round((parse(s) - TODAY) / 86400000);
+const fcfa = n => n.toLocaleString("fr-FR").replace(/ | /g, " ") + " FCFA";
+const shortDate = s => parse(s).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const firstName = n => n.split(" ")[0];
+
+function seed() {
+  return {
+    nextNum: 146,
+    customers: [
+      { id: "c1", name: "Awa Diop", phone: "+221 77 000 00 01", tpl: "F", m: { "Tour de poitrine": 96, "Tour de taille": 80, "Tour de bassin": 104, "Largeur d'épaules": 39, "Longueur de manche": 58, "Longueur de robe": 142 }, mDate: day(-41) },
+      { id: "c2", name: "Moussa Fall", phone: "+221 76 000 00 02", tpl: "H", m: { "Tour de cou": 41, "Largeur d'épaules": 47, "Tour de poitrine": 108, "Longueur de manche": 64, "Longueur boubou": 150, "Longueur de pantalon": 104 }, mDate: day(-90) },
+      { id: "c3", name: "Fatou Sow", phone: "+221 78 000 00 03", tpl: "F", m: { "Tour de poitrine": 90, "Tour de taille": 74, "Tour de bassin": 98, "Largeur d'épaules": 37, "Longueur de manche": 56, "Longueur de robe": 138 }, mDate: day(-20) },
+      { id: "c4", name: "Aminata Ndiaye", phone: "+221 77 000 00 04", tpl: "F", m: { "Tour de poitrine": 100, "Tour de taille": 86, "Tour de bassin": 110, "Largeur d'épaules": 40, "Longueur de manche": 59, "Longueur de robe": 145 }, mDate: day(-12) },
+      { id: "c5", name: "Ibrahima Sarr", phone: "+221 70 000 00 05", tpl: "H", m: { "Tour de cou": 39, "Largeur d'épaules": 45, "Tour de poitrine": 100, "Longueur de manche": 62, "Longueur boubou": 146, "Longueur de pantalon": 101 }, mDate: day(-60) },
+      { id: "c6", name: "Khady Gueye", phone: "+221 78 000 00 06", tpl: "F", m: { "Tour de poitrine": 94, "Tour de taille": 78, "Tour de bassin": 102, "Largeur d'épaules": 38, "Longueur de manche": 57, "Longueur de robe": 140 }, mDate: day(-8) },
+    ],
+    orders: [
+      { id: "o139", num: 139, customer: "c2", due: day(-2), created: day(-16), items: [{ garment: "Grand boubou", price: 45000, status: "finition", fabric: "client", sw: 0 }], payments: [{ amount: 20000, method: "wave", date: day(-16) }] },
+      { id: "o142", num: 142, customer: "c1", due: day(0), created: day(-10), items: [{ garment: "Taille basse", price: 25000, status: "pret", fabric: "client", sw: 1 }], payments: [{ amount: 10000, method: "wave", date: day(-10) }] },
+      { id: "o143", num: 143, customer: "c4", due: day(0), created: day(-9), items: [{ garment: "Robe", price: 30000, status: "couture", fabric: "atelier", sw: 3 }, { garment: "Tenue enfant", price: 12000, status: "finition", fabric: "atelier", sw: 3 }], payments: [{ amount: 20000, method: "especes", date: day(-9) }] },
+      { id: "o144", num: 144, customer: "c5", due: day(1), created: day(-7), items: [{ garment: "Caftan", price: 35000, status: "coupe", fabric: "client", sw: 5 }], payments: [] },
+      { id: "o145", num: 145, customer: "c3", due: day(4), created: day(-5), items: [{ garment: "Tenue enfant", price: 10000, status: "couture", fabric: "client", sw: 2 }, { garment: "Tenue enfant", price: 10000, status: "recu", fabric: "client", sw: 2 }, { garment: "Tenue enfant", price: 10000, status: "recu", fabric: "client", sw: 4 }], payments: [{ amount: 30000, method: "om", date: day(-5) }] },
+      { id: "o141", num: 141, customer: "c6", due: day(-3), created: day(-18), items: [{ garment: "Ensemble", price: 28000, status: "livre", fabric: "client", sw: 4 }], payments: [{ amount: 14000, method: "wave", date: day(-18) }, { amount: 14000, method: "especes", date: day(-3) }] },
+    ],
+  };
+}
+
+let db;
+function load() {
+  try { const s = localStorage.getItem(STORE_KEY); if (s) { db = JSON.parse(s); return; } } catch (e) {}
+  db = seed();
+}
+function save() {
+  try {
+    const light = { ...db, orders: db.orders.map(o => ({ ...o, items: o.items.map(i => ({ ...i, photo: null })) })) };
+    localStorage.setItem(STORE_KEY, JSON.stringify(light));
+  } catch (e) {}
+}
+load();
+
+// ─── Calculs ─────────────────────────────────────────────────────────────
+const cust = id => db.customers.find(c => c.id === id);
+const stepIdx = s => STEPS.findIndex(x => x[0] === s);
+const total = o => o.items.reduce((a, i) => a + i.price, 0);
+const paid = o => o.payments.reduce((a, p) => a + p.amount, 0);
+const rest = o => Math.max(0, total(o) - paid(o));
+const ref = o => "C-" + String(o.num).padStart(4, "0");
+function state(o) {
+  if (o.items.every(i => i.status === "livre")) return { key: "done", label: "livrée" };
+  if (o.items.every(i => stepIdx(i.status) >= 4)) return { key: "ready", label: "prête" };
+  if (diffDays(o.due) < 0) return { key: "late", label: "en retard" };
+  const min = Math.min(...o.items.map(i => stepIdx(i.status)));
+  return { key: "work", label: STEPS[min][1].toLowerCase() };
+}
+function dueLabel(o) {
+  const d = diffDays(o.due);
+  if (state(o).key === "done") return "Livrée";
+  if (d < 0) return `Retard ${-d} j`;
+  if (d === 0) return "Aujourd'hui";
+  if (d === 1) return "Demain";
+  return `Dans ${d} j`;
+}
+const swatch = (i) => i.photo
+  ? `background-image:url('${i.photo}')`
+  : (() => { const [a, b] = FABRICS[i.sw % FABRICS.length]; return `background-image:repeating-linear-gradient(45deg, ${a} 0 7px, ${b} 7px 10px, ${a} 10px 16px)`; })();
+
+// ─── Navigation ──────────────────────────────────────────────────────────
+const ui = { view: "home", filter: "avenir", orderId: null, draft: null };
+const $screen = document.getElementById("screen");
+const $chrome = document.getElementById("chrome");
+const $backdrop = document.getElementById("backdrop");
+const $sheet = document.getElementById("sheet");
+const $toast = document.getElementById("toast");
+
+function go(view, extra = {}) { Object.assign(ui, { view }, extra); closeSheet(); render(); $screen.scrollTop = 0; }
+function toast(msg) { $toast.textContent = msg; $toast.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => $toast.hidden = true, 2600); }
+function openSheet(html) { $sheet.innerHTML = `<div class="grab"></div>` + html; $backdrop.hidden = false; }
+function closeSheet() { $backdrop.hidden = true; $sheet.innerHTML = ""; }
+$backdrop.addEventListener("click", e => { if (e.target === $backdrop) closeSheet(); });
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !$backdrop.hidden) closeSheet(); });
+
+function render() {
+  if (ui.view === "home") renderHome();
+  else if (ui.view === "new") renderNew();
+  else if (ui.view === "order") renderOrder();
+}
+
+// ─── Écran 1 : Accueil ───────────────────────────────────────────────────
+function renderHome() {
+  const month = ymd(TODAY).slice(0, 7);
+  const active = db.orders.filter(o => state(o).key !== "done");
+  const todayItems = active.filter(o => diffDays(o.due) === 0).reduce((a, o) => a + o.items.filter(i => i.status !== "livre").length, 0);
+  const late = active.filter(o => state(o).key === "late").length;
+  const cashed = db.orders.flatMap(o => o.payments).filter(p => p.date.startsWith(month)).reduce((a, p) => a + p.amount, 0);
+  const toCash = active.reduce((a, o) => a + rest(o), 0);
+
+  const filters = [["avenir", "À venir"], ["jour", "Aujourd'hui"], ["retard", "En retard"], ["pretes", "Prêtes"], ["livrees", "Livrées"]];
+  let list = db.orders.slice();
+  if (ui.filter === "avenir") list = list.filter(o => state(o).key !== "done");
+  if (ui.filter === "jour") list = list.filter(o => diffDays(o.due) === 0 && state(o).key !== "done");
+  if (ui.filter === "retard") list = list.filter(o => state(o).key === "late");
+  if (ui.filter === "pretes") list = list.filter(o => state(o).key === "ready");
+  if (ui.filter === "livrees") list = list.filter(o => state(o).key === "done");
+  list.sort((a, b) => a.due.localeCompare(b.due));
+
+  const dateLbl = TODAY.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" });
+  $screen.className = "screen";
+  $screen.innerHTML = `
+    <div class="top"><div><small>${esc(dateLbl)}</small><h2>${ATELIER}</h2></div><div class="avatar" aria-hidden="true">N</div></div>
+    <div class="kpis">
+      <button class="kpi" data-filter="jour"><small>À livrer aujourd'hui</small><b>${todayItems} tenue${todayItems > 1 ? "s" : ""}</b></button>
+      <button class="kpi ${late ? "alert" : ""}" data-filter="retard"><small>En retard</small><b>${late}</b></button>
+      <div class="kpi money"><small>Encaissé ce mois</small><b>${fcfa(cashed)}</b></div>
+      <div class="kpi money"><small>Reste à encaisser</small><b>${fcfa(toCash)}</b></div>
+    </div>
+    <div class="chips" role="group" aria-label="Filtrer les commandes">
+      ${filters.map(([k, l]) => `<button class="chip" data-filter="${k}" aria-pressed="${ui.filter === k}">${l}</button>`).join("")}
+    </div>
+    <div class="list">
+      ${list.length ? list.map(o => {
+        const st = state(o), c = cust(o.customer), r = rest(o);
+        const g = o.items.length > 1 ? `${o.items[0].garment} + ${o.items.length - 1}` : o.items[0].garment;
+        return `<button class="order" data-open="${o.id}">
+          <span class="sw" style="${swatch(o.items[0])}"></span>
+          <b>${ref(o)} · ${esc(c.name)}</b><span class="pill ${st.key}">${st.label}</span>
+          <span class="sub"><span>${esc(g)} · ${dueLabel(o)}</span><strong>${r ? "Reste " + fcfa(r) : "Soldé"}</strong></span>
+        </button>`;
+      }).join("") : `<div class="empty"><b>Aucune commande ici</b><span>Changez de filtre ou créez une commande.</span></div>`}
+    </div>`;
+  $chrome.innerHTML = `
+    <button class="fab" data-act="new">+ Nouvelle commande</button>
+    <nav class="nav" aria-label="Navigation">
+      <button aria-current="page"><span>⌂</span>Accueil</button>
+      <button data-act="soon" data-what="La liste complète des commandes"><span>☰</span>Commandes</button>
+      <button data-act="soon" data-what="L'écran Clients"><span>☺</span>Clients</button>
+      <button data-act="more"><span>⋯</span>Plus</button>
+    </nav>`;
+}
+
+// ─── Écran 2 : Nouvelle commande ─────────────────────────────────────────
+const newItem = () => ({ garment: "", price: 0, fabric: "client", photo: null, sw: Math.floor(Math.random() * FABRICS.length), status: "recu" });
+function startDraft() { ui.draft = { customer: null, newCust: null, query: "", items: [newItem()], due: day(7), deposit: 0, method: "wave" }; }
+
+function draftIssues(d) {
+  const out = [];
+  if (!d.customer && !(d.newCust && d.newCust.name.trim())) out.push("le client");
+  if (!d.items.length || d.items.some(i => !i.garment)) out.push("le type de chaque tenue");
+  if (d.items.some(i => !(i.price > 0))) out.push("le prix de chaque tenue");
+  if (!d.due) out.push("la date de livraison");
+  return out;
+}
+function renderNew() {
+  const d = ui.draft;
+  $screen.className = "screen with-footer";
+  const c = d.customer ? cust(d.customer) : null;
+  const q = d.query.trim().toLowerCase();
+  const matches = q ? db.customers.filter(x => x.name.toLowerCase().includes(q) || x.phone.replace(/\s/g, "").includes(q.replace(/\s/g, ""))).slice(0, 4) : [];
+  const quick = [[3, "Dans 3 jours"], [7, "1 semaine"], [14, "2 semaines"], [21, "3 semaines"]];
+
+  $screen.innerHTML = `
+    <div class="bar"><button class="iconbtn" data-act="home" aria-label="Retour">←</button><h2>Nouvelle commande</h2></div>
+    <div class="section"><h3>Client</h3>
+      ${c ? `<div class="selected"><div><b>${esc(c.name)}</b><small>${esc(c.phone)} · mesures du ${shortDate(c.mDate)}</small></div><button class="soft" data-act="unpick">Changer</button></div>`
+        : d.newCust ? `<div class="card">
+            <div class="field"><label for="nc-name">Nom du client</label><input class="input" id="nc-name" data-bind="nc-name" value="${esc(d.newCust.name)}" placeholder="Ex. Mariama Diallo" autocomplete="off"></div>
+            <div class="field"><label for="nc-phone">Téléphone WhatsApp</label><input class="input" id="nc-phone" data-bind="nc-phone" value="${esc(d.newCust.phone)}" inputmode="tel" placeholder="77 123 45 67"></div>
+            <button class="soft" data-act="cancel-new">Choisir un client existant</button></div>`
+        : `<div class="field"><label for="cust-q">Chercher par nom ou téléphone</label><input class="input" id="cust-q" data-bind="query" value="${esc(d.query)}" placeholder="Ex. Awa ou 77 000" autocomplete="off"></div>
+           <div class="results" id="results">${resultsHtml(matches, q)}</div>
+           <button class="ghost" data-act="new-cust">+ Nouveau client</button>`}
+    </div>
+    <div class="section"><h3>Tenues</h3>
+      ${d.items.map((it, n) => `<div class="card">
+        <div class="itemhead"><b>Tenue ${n + 1}</b>${d.items.length > 1 ? `<button class="remove" data-act="rm-item" data-i="${n}">Retirer</button>` : ""}</div>
+        <div class="pick" role="group" aria-label="Type de tenue">${GARMENTS.map(g => `<button data-act="garment" data-i="${n}" data-v="${g}" aria-pressed="${it.garment === g}">${g}</button>`).join("")}</div>
+        <div class="photo"><span class="sw" style="${swatch(it)}"></span>
+          <label for="ph-${n}">${it.photo ? "Changer la photo" : "📷 Photo du modèle"}</label><input type="file" id="ph-${n}" accept="image/*" capture="environment" data-photo="${n}"></div>
+        <div class="pick" role="group" aria-label="Tissu">
+          <button data-act="fabric" data-i="${n}" data-v="client" aria-pressed="${it.fabric === "client"}">Tissu du client</button>
+          <button data-act="fabric" data-i="${n}" data-v="atelier" aria-pressed="${it.fabric === "atelier"}">Tissu de l'atelier</button></div>
+        <div class="field"><label for="price-${n}">Prix (FCFA)</label><input class="input money" id="price-${n}" data-bind="price" data-i="${n}" inputmode="numeric" value="${it.price || ""}" placeholder="25 000"></div>
+      </div>`).join("")}
+      <button class="ghost" data-act="add-item">+ Ajouter une tenue</button>
+    </div>
+    <div class="section"><h3>Livraison</h3>
+      <div class="pick" role="group" aria-label="Délai">${quick.map(([n, l]) => `<button data-act="due" data-v="${day(n)}" aria-pressed="${d.due === day(n)}">${l}</button>`).join("")}</div>
+      <div class="field"><label for="due">Date de livraison</label><input class="input" type="date" id="due" data-bind="due" value="${d.due}" min="${day(0)}"></div>
+    </div>
+    <div class="section"><h3>Acompte</h3>
+      <div class="field"><label for="deposit">Montant reçu aujourd'hui (FCFA)</label><input class="input money" id="deposit" data-bind="deposit" inputmode="numeric" value="${d.deposit || ""}" placeholder="0"></div>
+      <div class="pick" role="group" aria-label="Moyen de paiement">${Object.entries(METHODS).map(([k, l]) => `<button data-act="method" data-v="${k}" aria-pressed="${d.method === k}">${l}</button>`).join("")}
+        <button data-act="half">50 % du total</button></div>
+    </div>`;
+  $chrome.innerHTML = `<div class="footer" id="new-footer"></div>`;
+  updateFooter();
+}
+function resultsHtml(matches, q) {
+  if (!q) return "";
+  if (!matches.length) return `<p class="hint">Aucun client trouvé. Créez-le avec « Nouveau client ».</p>`;
+  return matches.map(x => `<button class="result" data-act="pick" data-v="${x.id}"><span><b>${esc(x.name)}</b><br><small>${esc(x.phone)}</small></span><span aria-hidden="true">›</span></button>`).join("");
+}
+function updateFooter() {
+  const d = ui.draft, t = d.items.reduce((a, i) => a + (i.price || 0), 0), dep = Math.min(d.deposit || 0, t);
+  const issues = draftIssues(d);
+  document.getElementById("new-footer").innerHTML = `
+    <div class="sum"><div><small>Total</small><b>${fcfa(t)}</b></div><div><small>Acompte</small><b>${fcfa(dep)}</b></div><div class="rest"><small>Reste à payer</small><b>${fcfa(t - dep)}</b></div></div>
+    <button class="primary" data-act="save" ${issues.length ? "disabled" : ""}>Enregistrer la commande</button>
+    ${issues.length ? `<p class="hint">À compléter : ${issues.join(", ")}.</p>` : ""}`;
+}
+const toInt = v => parseInt(String(v).replace(/\D/g, ""), 10) || 0;
+
+function saveDraft() {
+  const d = ui.draft;
+  if (draftIssues(d).length) return;
+  let cid = d.customer;
+  if (!cid) {
+    cid = "c" + Date.now();
+    db.customers.push({ id: cid, name: d.newCust.name.trim(), phone: d.newCust.phone.trim() || "Pas de numéro", tpl: "F", m: {}, mDate: day(0) });
+  }
+  const o = { id: "o" + Date.now(), num: db.nextNum++, customer: cid, due: d.due, created: day(0),
+    items: d.items.map(i => ({ ...i })), payments: [] };
+  const t = total(o), dep = Math.min(d.deposit || 0, t);
+  if (dep > 0) o.payments.push({ amount: dep, method: d.method, date: day(0) });
+  db.orders.push(o); save();
+  go("order", { orderId: o.id });
+  toast(`Commande ${ref(o)} enregistrée`);
+  setTimeout(() => waSheet(o, "recap", true), 350);
+}
+
+// ─── Écran 3 : Détail commande ───────────────────────────────────────────
+function renderOrder() {
+  const o = db.orders.find(x => x.id === ui.orderId);
+  if (!o) return go("home");
+  const c = cust(o.customer), st = state(o), r = rest(o);
+  $screen.className = "screen";
+  $screen.innerHTML = `
+    <div class="bar"><button class="iconbtn" data-act="home" aria-label="Retour">←</button><h2>${ref(o)}</h2><span class="pill ${st.key}">${st.label}</span></div>
+    <div class="client"><div class="avatar" aria-hidden="true">${esc(c.name[0])}</div><div><b>${esc(c.name)}</b><small>${esc(c.phone)}</small></div></div>
+    <div class="btnrow">
+      <button class="soft wa" data-act="wa" data-v="${st.key === "ready" ? "ready" : r ? "rappel" : "recap"}">WhatsApp</button>
+      <button class="soft" data-act="measures">Mesures</button>
+      <button class="soft" data-act="receipt">Reçu</button>
+    </div>
+    <div class="meta"><span>Livraison <strong>${shortDate(o.due)}</strong></span><span>${dueLabel(o)}</span></div>
+    <div class="section"><h3>Tenues · ${o.items.length}</h3>
+      ${o.items.map((it, n) => {
+        const k = stepIdx(it.status), next = STEPS[k + 1];
+        return `<div class="card garment">
+          <span class="sw" style="${swatch(it)}"></span>
+          <div><b>${esc(it.garment)}<span>${fcfa(it.price)}</span></b><small>${it.fabric === "client" ? "Tissu du client" : "Tissu de l'atelier"}</small></div>
+          <div class="steps ${it.status === "livre" ? "done" : ""}" aria-hidden="true">${STEPS.map((_, j) => `<i class="${j <= k ? "on" : ""}"></i>`).join("")}</div>
+          <div class="steplbl"><span>Étape : <strong>${STEPS[k][1]}</strong></span>
+            ${next ? `<button class="advance ${next[0] === "pret" || next[0] === "livre" ? "ok" : ""}" data-act="advance" data-i="${n}">${next[0] === "livre" ? "Marquer livrée" : "Passer à : " + next[1]}</button>` : ""}</div>
+        </div>`;
+      }).join("")}
+    </div>
+    <div class="section"><h3>Paiements</h3>
+      <div class="card money-card">
+        <div class="pay"><span>Total des tenues</span><b>${fcfa(total(o))}</b></div>
+        ${o.payments.map(p => `<div class="pay"><span>${shortDate(p.date)} · ${METHODS[p.method]}</span><b>− ${fcfa(p.amount)}</b></div>`).join("") || `<div class="pay"><span>Aucun paiement reçu</span><b></b></div>`}
+        <div class="restline"><span>Reste à payer</span><b class="${r ? "due" : "zero"}">${r ? fcfa(r) : "Soldé"}</b></div>
+        ${r ? `<button class="primary" data-act="cash">Encaisser</button>` : ""}
+      </div>
+    </div>`;
+  $chrome.innerHTML = "";
+}
+
+function advance(o, n) {
+  const it = o.items[n], k = stepIdx(it.status);
+  if (k >= STEPS.length - 1) return;
+  it.status = STEPS[k + 1][0];
+  save(); render();
+  if (it.status === "livre" && o.items.every(i => i.status === "livre")) toast("Commande livrée");
+  else if (o.items.every(i => stepIdx(i.status) >= 4) && it.status === "pret") { toast("Toutes les tenues sont prêtes"); setTimeout(() => waSheet(o, "ready"), 300); }
+  else toast(`${it.garment} : ${STEPS[k + 1][1]}`);
+}
+
+// ─── Feuilles : WhatsApp, encaissement, mesures, reçu ────────────────────
+function message(o, kind) {
+  const c = cust(o.customer), r = rest(o), p = firstName(c.name);
+  const lines = o.items.map(i => `• ${i.garment} : ${fcfa(i.price)}`).join("\n");
+  if (kind === "ready") return `Bonjour ${p}, bonne nouvelle : votre commande ${ref(o)} est prête !\n${r ? `Reste à payer : ${fcfa(r)} (Wave, Orange Money ou espèces).\n` : ""}Vous pouvez passer la récupérer à l'${ATELIER}. À bientôt !`;
+  if (kind === "rappel") return `Bonjour ${p}, petit rappel pour votre commande ${ref(o)} à l'${ATELIER} : il reste ${fcfa(r)} à régler (Wave, Orange Money ou espèces). Livraison prévue le ${shortDate(o.due)}. Merci !`;
+  const dep = paid(o);
+  return `Bonjour ${p}, merci pour votre commande ${ref(o)} à l'${ATELIER}.\n${lines}\nTotal : ${fcfa(total(o))}\n${dep ? `Acompte reçu : ${fcfa(dep)}\n` : ""}Reste à payer : ${fcfa(r)}\nLivraison prévue le ${shortDate(o.due)}.`;
+}
+function waSheet(o, kind, justSaved) {
+  const c = cust(o.customer);
+  const titles = { recap: "Envoyer le récapitulatif", ready: "Prévenir que c'est prêt", rappel: "Rappeler le solde" };
+  const digits = c.phone.replace(/\D/g, "");
+  openSheet(`
+    <h3>${titles[kind]}</h3>
+    <p>${justSaved ? "La commande est enregistrée. " : ""}Message pour ${esc(c.name)}, modifiable avant l'envoi.</p>
+    <div class="pick" role="group" aria-label="Type de message">
+      ${Object.entries(titles).map(([k, l]) => `<button data-act="wa" data-v="${k}" aria-pressed="${k === kind}">${l.replace("Envoyer le ", "").replace("Prévenir que c'est ", "").replace("Rappeler le ", "")}</button>`).join("")}
+    </div>
+    <textarea class="msg" id="wa-msg" aria-label="Message">${esc(message(o, kind))}</textarea>
+    ${digits.length >= 9 ? `<a class="walink" id="wa-link" href="https://wa.me/${digits}?text=${encodeURIComponent(message(o, kind))}" target="_blank" rel="noopener">Ouvrir dans WhatsApp</a>` : `<p class="hint">Pas de numéro WhatsApp pour ce client.</p>`}
+    <button class="soft" data-act="copy">Copier le message</button>
+    <p class="hint">Numéros fictifs dans cette maquette : WhatsApp ne trouvera pas le contact.</p>`);
+  const ta = document.getElementById("wa-msg"), link = document.getElementById("wa-link");
+  ta.addEventListener("input", () => { if (link) link.href = `https://wa.me/${digits}?text=${encodeURIComponent(ta.value)}`; });
+}
+function cashSheet(o) {
+  const r = rest(o);
+  openSheet(`
+    <h3>Encaisser</h3><p>Reste à payer : <b>${fcfa(r)}</b></p>
+    <div class="field"><label for="cash-amt">Montant reçu (FCFA)</label><input class="input money" id="cash-amt" inputmode="numeric" value="${r}"></div>
+    <div class="pick" role="group" aria-label="Moyen de paiement" id="cash-methods">${Object.entries(METHODS).map(([k, l], j) => `<button data-act="cash-method" data-v="${k}" aria-pressed="${j === 1}">${l}</button>`).join("")}</div>
+    <button class="primary" data-act="cash-ok">Enregistrer le paiement</button>`);
+}
+function measuresSheet(o) {
+  const c = cust(o.customer), entries = Object.entries(c.m);
+  openSheet(`
+    <h3>Mesures de ${esc(firstName(c.name))}</h3>
+    <p>Fiche ${c.tpl === "H" ? "homme" : "femme"} · prises le ${shortDate(c.mDate)}</p>
+    ${entries.length ? `<div class="measures">${entries.map(([k, v]) => `<div><span>${esc(k)}</span><b>${v} cm</b></div>`).join("")}</div>` : `<p class="hint">Aucune mesure prise pour ce nouveau client.</p>`}
+    <button class="soft" data-act="soon" data-what="La prise de mesures">Prendre de nouvelles mesures</button>`);
+}
+function receiptSheet(o) {
+  const c = cust(o.customer);
+  openSheet(`
+    <h3>Reçu</h3>
+    <div class="receipt">
+      <div class="rh"><b>${ATELIER}</b><span>Reçu ${ref(o)} · ${shortDate(day(0))}</span><span>Client : ${esc(c.name)}</span></div>
+      ${o.items.map(i => `<div class="ln"><span>${esc(i.garment)}</span><b>${fcfa(i.price)}</b></div>`).join("")}
+      <div class="ln tot"><span>Total</span><b>${fcfa(total(o))}</b></div>
+      ${o.payments.map(p => `<div class="ln"><span>${shortDate(p.date)} · ${METHODS[p.method]}</span><b>− ${fcfa(p.amount)}</b></div>`).join("")}
+      <div class="ln tot"><span><b>Reste à payer</b></span><b>${fcfa(rest(o))}</b></div>
+      <div class="foot">Géré avec ${APP}</div>
+    </div>
+    <p class="hint">Dans l'application, ce reçu se partage en PDF sur WhatsApp.</p>`);
+}
+
+// ─── Événements ──────────────────────────────────────────────────────────
+document.getElementById("device").addEventListener("click", e => {
+  const b = e.target.closest("[data-act],[data-filter],[data-open]");
+  if (!b) return;
+  if (b.dataset.filter) { ui.filter = b.dataset.filter; return renderHome(); }
+  if (b.dataset.open) return go("order", { orderId: b.dataset.open });
+  const act = b.dataset.act, d = ui.draft, i = +b.dataset.i;
+  const o = db.orders.find(x => x.id === ui.orderId);
+  switch (act) {
+    case "home": return go("home");
+    case "new": startDraft(); return go("new");
+    case "soon": return toast(`${b.dataset.what} n'est pas dans cette maquette`);
+    case "more": return openSheet(`<h3>Maquette ${APP}</h3><p>Écrans testables : Accueil, Nouvelle commande, Détail d'une commande. Données fictives, enregistrées seulement sur ce téléphone.</p><button class="soft" data-act="reset">Remettre la maquette à zéro</button>`);
+    case "reset": db = seed(); save(); closeSheet(); go("home", { filter: "avenir" }); return toast("Maquette remise à zéro");
+    case "pick": d.customer = b.dataset.v; return renderNew();
+    case "unpick": d.customer = null; d.query = ""; return renderNew();
+    case "new-cust": d.newCust = { name: d.query, phone: "" }; return renderNew();
+    case "cancel-new": d.newCust = null; return renderNew();
+    case "garment": d.items[i].garment = b.dataset.v; return renderNew();
+    case "fabric": d.items[i].fabric = b.dataset.v; return renderNew();
+    case "add-item": d.items.push(newItem()); return renderNew();
+    case "rm-item": d.items.splice(i, 1); return renderNew();
+    case "due": d.due = b.dataset.v; return renderNew();
+    case "method": d.method = b.dataset.v; return renderNew();
+    case "half": d.deposit = Math.round(d.items.reduce((a, x) => a + (x.price || 0), 0) / 2 / 500) * 500; return renderNew();
+    case "save": b.disabled = true; return saveDraft();
+    case "advance": return advance(o, i);
+    case "wa": return waSheet(o, b.dataset.v);
+    case "measures": return measuresSheet(o);
+    case "receipt": return receiptSheet(o);
+    case "cash": return cashSheet(o);
+    case "cash-method": document.querySelectorAll("#cash-methods button").forEach(x => x.setAttribute("aria-pressed", x === b)); return;
+    case "cash-ok": {
+      const amt = Math.min(toInt(document.getElementById("cash-amt").value), rest(o));
+      if (!amt) return toast("Indiquez un montant");
+      const m = document.querySelector('#cash-methods [aria-pressed="true"]')?.dataset.v || "especes";
+      o.payments.push({ amount: amt, method: m, date: day(0) }); save(); closeSheet(); render();
+      return toast(`${fcfa(amt)} encaissés · ${METHODS[m]}`);
+    }
+    case "copy": {
+      const ta = document.getElementById("wa-msg");
+      navigator.clipboard.writeText(ta.value).then(() => toast("Message copié")).catch(() => { ta.select(); toast("Sélectionné : copiez avec votre clavier"); });
+      return;
+    }
+  }
+});
+document.getElementById("device").addEventListener("input", e => {
+  const el = e.target, d = ui.draft;
+  if (!d || !el.dataset.bind) return;
+  const k = el.dataset.bind;
+  if (k === "query") { d.query = el.value; const q = el.value.trim().toLowerCase();
+    const m = q ? db.customers.filter(x => x.name.toLowerCase().includes(q) || x.phone.replace(/\s/g, "").includes(q.replace(/\s/g, ""))).slice(0, 4) : [];
+    document.getElementById("results").innerHTML = resultsHtml(m, q); }
+  if (k === "nc-name") d.newCust.name = el.value;
+  if (k === "nc-phone") d.newCust.phone = el.value;
+  if (k === "price") d.items[+el.dataset.i].price = toInt(el.value);
+  if (k === "deposit") d.deposit = toInt(el.value);
+  if (k === "due") d.due = el.value;
+  updateFooter();
+});
+document.getElementById("device").addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.photo === undefined || !el.files?.[0]) return;
+  const n = +el.dataset.photo, r = new FileReader();
+  r.onload = () => { ui.draft.items[n].photo = r.result; renderNew(); };
+  r.readAsDataURL(el.files[0]);
+});
+document.getElementById("reset-demo").addEventListener("click", () => { db = seed(); save(); go("home", { filter: "avenir" }); toast("Maquette remise à zéro"); });
+
+render();
+</script>
