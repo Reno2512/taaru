@@ -5,7 +5,7 @@ Fichier tenu à jour par l'agent après chaque étape validée.
 ## État actuel
 - Cadrage produit : `docs/produit.md`
 - Schéma de base de données testé (RLS, numéros de commande, historique des statuts) : `supabase/schema.sql`
-- Maquette cliquable d'interview (HTML autonome, données fictives) : `docs/maquette.html`. Écrans : accueil, nouvelle commande, détail commande.
+- Maquette cliquable d'interview (HTML autonome, données fictives) : `docs/maquette.html`. Écrans : accueil, nouvelle commande, détail commande, onglet Clients (liste, recherche, nouveau client avec ses mesures), bloc Mesures sur chaque commande, prise de mesures (fiches femme / homme / enfant, reprise des dernières mesures, mesures personnalisées, observations, historique avec écarts).
 - Aucun code applicatif pour l'instant.
 
 ## Décisions
