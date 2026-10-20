@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/*
+ * Jetons de couleur : voir docs/design-system.md.
+ * Les noms suivent la convention shadcn/ui pour que ses composants s'y branchent directement.
+ */
+:root {
+  --background: #f5f6fa;
+  --foreground: #161b33;
+  --card: #ffffff;
+  --card-foreground: #161b33;
+  --muted: #eceef5;
+  --muted-foreground: #5a6080;
+  --border: #dcdfea;
+  --input: #dcdfea;
+  --ring: #2c3a8c;
+  --primary: #2c3a8c;
+  --primary-foreground: #ffffff;
+  --primary-soft: #e5e8f6;
+  --secondary: #161b33;
+  --secondary-foreground: #f5f6fa;
+  --accent: #f2c230;
+  --accent-foreground: #3d3000;
+  --success: #1d8754;
+  --success-soft: #dff2e8;
+  --warning: #b4541a;
+  --warning-soft: #fbe9dd;
+  --destructive: #b42318;
+  --destructive-foreground: #ffffff;
+  --whatsapp: #1e9e57;
+  --brand: #2c3a8c;
+  --brand-foreground: #ffffff;
+  --radius: 0.75rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0e1122;
+    --foreground: #e9ebf5;
+    --card: #171b33;
+    --card-foreground: #e9ebf5;
+    --muted: #1e2340;
+    --muted-foreground: #a0a6c4;
+    --border: #2a3052;
+    --input: #2a3052;
+    --ring: #7f8ff0;
+    --primary: #7f8ff0;
+    --primary-foreground: #0e1122;
+    --primary-soft: #222a55;
+    --secondary: #e9ebf5;
+    --secondary-foreground: #0e1122;
+    --accent: #e8b923;
+    --accent-foreground: #2a2000;
+    --success: #52c98e;
+    --success-soft: #133224;
+    --warning: #f0965a;
+    --warning-soft: #3a2414;
+    --destructive: #f97066;
+    --destructive-foreground: #0e1122;
+    --whatsapp: #3cc57a;
+    --brand: #1c2350;
+    --brand-foreground: #e9ebf5;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-soft: var(--primary-soft);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-whatsapp: var(--whatsapp);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+
+  --font-sans: var(--font-work-sans), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-syne), "Segoe UI", system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), ui-monospace, Menlo, monospace;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  h1, h2, h3 {
+    text-wrap: balance;
+  }
+}

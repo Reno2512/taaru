@@ -2,9 +2,8 @@
 -- Chaque vérification lève une exception en cas d'échec.
 \set ON_ERROR_STOP on
 
-grant all on all tables in schema public to authenticated;
+-- Les droits sur le schéma public viennent de la migration elle-même (testés ici).
 grant all on storage.objects to authenticated;
-grant execute on all functions in schema public to authenticated;
 
 insert into auth.users values
   ('00000000-0000-0000-0000-00000000000a'),  -- propriétaire de l'atelier A

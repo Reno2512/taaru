@@ -1,4 +1,26 @@
+# Dépendances
+/node_modules
+
+# Next.js
+/.next/
+/out/
+/build
+next-env.d.ts
+*.tsbuildinfo
+
+# Tests
+/coverage
+
+# Variables d'environnement : jamais committées, sauf le modèle
 .env*
 !.env.example
-node_modules/
-.next/
+
+# Divers
+.DS_Store
+*.pem
+npm-debug.log*
+.vercel
+
+# Supabase CLI (fichiers locaux)
+supabase/.temp
+supabase/.branches

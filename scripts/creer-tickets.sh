@@ -15,7 +15,7 @@ ticket() { gh issue create --title "$1" --label "$2" --body "$3" >/dev/null && e
 ticket "Semaine 0 · 15 interviews d'ateliers avec la maquette" "mvp,retour-terrain" \
 "Suivre docs/interviews.md. Continuer si : 10/15 citent le problème, 8 pilotes, 5 précommandes."
 ticket "Semaine 1 · Socle Next.js, Supabase, CI et mise en ligne Vercel" "mvp" \
-"Next.js + TypeScript strict, Tailwind, shadcn/ui, projet Supabase de dev avec supabase/schema.sql, lint + typecheck dans la CI, déploiement Vercel. Terminé quand la page vide est en ligne et la CI passe."
+"Next.js + TypeScript strict, Tailwind, shadcn/ui, projet Supabase de dev avec supabase/migrations/, lint + typecheck dans la CI, déploiement Vercel. Terminé quand la page vide est en ligne et la CI passe."
 ticket "Semaine 1 · Design system extrait de l'écran d'accueil" "mvp" \
 "Valider l'accueil à 360 px, puis écrire docs/design-system.md (couleurs, typo, espacements, composants)."
 ticket "Semaine 2 · Connexion et création d'atelier" "mvp,sécurité" \
