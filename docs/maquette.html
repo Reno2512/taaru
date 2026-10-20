@@ -132,7 +132,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 
 /* Détail */
 .client { display: flex; align-items: center; gap: 12px; padding: 14px }
-.client div { flex: 1; min-width: 0 }
+.client > div:not(.avatar) { flex: 1; min-width: 0 }
 .client b { font-size: 17px }
 .client small { display: block; color: var(--muted); user-select: all }
 .btnrow { display: flex; gap: 8px; padding: 0 14px 6px; flex-wrap: wrap }
@@ -181,6 +181,28 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .receipt .tot { border-top: 1px dashed var(--line); padding-top: 6px }
 .receipt .foot { text-align: center; font: 500 11px var(--f-mono); color: var(--muted); padding-top: 6px }
 
+/* Prise de mesures */
+.mlist { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden }
+.mrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 12px; border-top: 1px solid var(--line); cursor: text }
+.mrow:first-child { border-top: 0 }
+.mrow > span:first-child { display: block; min-width: 0; font-weight: 500 }
+.mrow small { display: block; color: var(--muted); font-weight: 400; font-size: 12px; font-variant-numeric: tabular-nums }
+.mbox { display: flex; align-items: center; gap: 6px; flex: none }
+.minput { width: 84px; min-height: 46px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); text-align: right; padding: 0 10px; font: 600 18px var(--f-mono); font-variant-numeric: tabular-nums }
+.minput:focus { border-color: var(--indigo); background: var(--surface) }
+.mrow.bad .minput { border-color: var(--warn); color: var(--warn) }
+.mrow.bad small { color: var(--warn) }
+.mbox em { font-style: normal; color: var(--muted); font-size: 13px; width: 20px }
+.mrow.filled > span:first-child::before { content: "✓ "; color: var(--ok) }
+.addrow { display: flex; gap: 8px }
+.addrow .input { flex: 1; min-width: 0 }
+.textarea { min-height: 80px; resize: vertical; font: inherit; font-size: 16px }
+.mhist { display: flex; gap: 6px; flex-wrap: wrap }
+.mhist button { border: 1px solid var(--line); background: var(--bg); border-radius: 99px; padding: 6px 11px; font-size: 13px }
+.mhist button[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink) }
+.msummary { display: flex; align-items: center; justify-content: space-between; gap: 10px; border-top: 1px solid var(--line); padding-top: 10px; margin-top: 2px; font-size: 13.5px; color: var(--muted) }
+.measures .diff { color: var(--indigo); font-size: 12px; font-weight: 500; margin-left: 6px }
+
 .toast { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 20; background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-size: 14px; font-weight: 500; width: max-content; max-width: calc(100% - 28px); text-align: center }
 @media (prefers-reduced-motion: no-preference) {
   .sheet { animation: up .22s ease-out }
@@ -198,11 +220,12 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
   <aside class="notes">
     <span class="tag">Maquette d'interview · données fictives</span>
     <h1>Taaru, l'atelier dans le téléphone</h1>
-    <p>Trois écrans à faire tester par le tailleur, sur votre téléphone, sans rien expliquer d'abord.</p>
+    <p>Quatre parcours à faire tester par le tailleur, sur votre téléphone, sans rien expliquer d'abord.</p>
     <ol>
       <li><b>Accueil</b> : « Quelles tenues devez-vous livrer aujourd'hui ? »</li>
       <li><b>Nouvelle commande</b> : « Enregistrez la commande d'une cliente qui veut deux tenues pour la Tabaski. »</li>
       <li><b>Détail</b> : « La tenue est prête : prévenez la cliente et encaissez le solde. »</li>
+      <li><b>Mesures</b> : « Prenez les mesures de cette cliente avec votre mètre ruban, directement dans le téléphone. »</li>
     </ol>
     <p>Notez où le tailleur hésite, ce qu'il cherche sans le trouver, et les mots qu'il emploie.</p>
     <p><button class="linkbtn" id="reset-demo" type="button">Remettre la maquette à zéro</button></p>
@@ -217,7 +240,14 @@ const STEPS = [["recu", "Reçu"], ["coupe", "Coupe"], ["couture", "Couture"], ["
 const GARMENTS = ["Taille basse", "Grand boubou", "Robe", "Caftan", "Ensemble", "Tenue enfant", "Pantalon", "Autre"];
 const METHODS = { especes: "Espèces", wave: "Wave", om: "Orange Money" };
 const FABRICS = [["#2C3A8C", "#F2C230"], ["#B4541A", "#F7E3C6"], ["#1D8754", "#F2C230"], ["#7A1F4D", "#F4D7E4"], ["#0F6A73", "#E7F3F1"], ["#3D2B1F", "#E8C07A"]];
-const STORE_KEY = "taaru-maquette-v1";
+const STORE_KEY = "taaru-maquette-v2";
+// Fiches de mesures : mêmes champs que supabase/schema.sql (à valider avec des tailleurs).
+const TEMPLATES = {
+  F: { label: "Femme", fields: ["Tour de poitrine", "Tour de taille", "Tour de bassin", "Largeur d'épaules", "Carrure dos", "Hauteur de poitrine", "Longueur du buste", "Longueur de manche", "Tour de bras", "Longueur de robe", "Longueur de jupe / pagne"] },
+  H: { label: "Homme", fields: ["Tour de cou", "Largeur d'épaules", "Tour de poitrine", "Tour de ventre", "Longueur de manche", "Tour de bras", "Longueur caftan / boubou", "Tour de taille (pantalon)", "Tour de cuisse", "Longueur de pantalon", "Bas de pantalon"] },
+  E: { label: "Enfant", fields: ["Tour de poitrine", "Tour de taille", "Largeur d'épaules", "Longueur de manche", "Longueur du haut", "Longueur du bas"] },
+};
+const M_MIN = 5, M_MAX = 250;
 
 const pad = n => String(n).padStart(2, "0");
 const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -234,12 +264,12 @@ function seed() {
   return {
     nextNum: 146,
     customers: [
-      { id: "c1", name: "Awa Diop", phone: "+221 77 000 00 01", tpl: "F", m: { "Tour de poitrine": 96, "Tour de taille": 80, "Tour de bassin": 104, "Largeur d'épaules": 39, "Longueur de manche": 58, "Longueur de robe": 142 }, mDate: day(-41) },
-      { id: "c2", name: "Moussa Fall", phone: "+221 76 000 00 02", tpl: "H", m: { "Tour de cou": 41, "Largeur d'épaules": 47, "Tour de poitrine": 108, "Longueur de manche": 64, "Longueur boubou": 150, "Longueur de pantalon": 104 }, mDate: day(-90) },
-      { id: "c3", name: "Fatou Sow", phone: "+221 78 000 00 03", tpl: "F", m: { "Tour de poitrine": 90, "Tour de taille": 74, "Tour de bassin": 98, "Largeur d'épaules": 37, "Longueur de manche": 56, "Longueur de robe": 138 }, mDate: day(-20) },
-      { id: "c4", name: "Aminata Ndiaye", phone: "+221 77 000 00 04", tpl: "F", m: { "Tour de poitrine": 100, "Tour de taille": 86, "Tour de bassin": 110, "Largeur d'épaules": 40, "Longueur de manche": 59, "Longueur de robe": 145 }, mDate: day(-12) },
-      { id: "c5", name: "Ibrahima Sarr", phone: "+221 70 000 00 05", tpl: "H", m: { "Tour de cou": 39, "Largeur d'épaules": 45, "Tour de poitrine": 100, "Longueur de manche": 62, "Longueur boubou": 146, "Longueur de pantalon": 101 }, mDate: day(-60) },
-      { id: "c6", name: "Khady Gueye", phone: "+221 78 000 00 06", tpl: "F", m: { "Tour de poitrine": 94, "Tour de taille": 78, "Tour de bassin": 102, "Largeur d'épaules": 38, "Longueur de manche": 57, "Longueur de robe": 140 }, mDate: day(-8) },
+      { id: "c1", name: "Awa Diop", phone: "+221 77 000 00 01", tpl: "F", hist: [{ date: day(-41), tpl: "F", values: { "Tour de poitrine": 96, "Tour de taille": 80, "Tour de bassin": 104, "Largeur d'épaules": 39, "Longueur de manche": 58, "Longueur de robe": 142 }, notes: "Préfère les manches un peu amples." }, { date: day(-240), tpl: "F", values: { "Tour de poitrine": 94, "Tour de taille": 77, "Tour de bassin": 101, "Largeur d'épaules": 39, "Longueur de manche": 58, "Longueur de robe": 142 }, notes: "" }] },
+      { id: "c2", name: "Moussa Fall", phone: "+221 76 000 00 02", tpl: "H", hist: [{ date: day(-90), tpl: "H", values: { "Tour de cou": 41, "Largeur d'épaules": 47, "Tour de poitrine": 108, "Longueur de manche": 64, "Longueur caftan / boubou": 150, "Longueur de pantalon": 104 }, notes: "" }] },
+      { id: "c3", name: "Fatou Sow", phone: "+221 78 000 00 03", tpl: "F", hist: [{ date: day(-20), tpl: "F", values: { "Tour de poitrine": 90, "Tour de taille": 74, "Tour de bassin": 98, "Largeur d'épaules": 37, "Longueur de manche": 56, "Longueur de robe": 138 }, notes: "" }] },
+      { id: "c4", name: "Aminata Ndiaye", phone: "+221 77 000 00 04", tpl: "F", hist: [{ date: day(-12), tpl: "F", values: { "Tour de poitrine": 100, "Tour de taille": 86, "Tour de bassin": 110, "Largeur d'épaules": 40, "Longueur de manche": 59, "Longueur de robe": 145 }, notes: "" }] },
+      { id: "c5", name: "Ibrahima Sarr", phone: "+221 70 000 00 05", tpl: "H", hist: [{ date: day(-60), tpl: "H", values: { "Tour de cou": 39, "Largeur d'épaules": 45, "Tour de poitrine": 100, "Longueur de manche": 62, "Longueur caftan / boubou": 146, "Longueur de pantalon": 101 }, notes: "" }] },
+      { id: "c6", name: "Khady Gueye", phone: "+221 78 000 00 06", tpl: "F", hist: [{ date: day(-8), tpl: "F", values: { "Tour de poitrine": 94, "Tour de taille": 78, "Tour de bassin": 102, "Largeur d'épaules": 38, "Longueur de manche": 57, "Longueur de robe": 140 }, notes: "" }] },
     ],
     orders: [
       { id: "o139", num: 139, customer: "c2", due: day(-2), created: day(-16), items: [{ garment: "Grand boubou", price: 45000, status: "finition", fabric: "client", sw: 0 }], payments: [{ amount: 20000, method: "wave", date: day(-16) }] },
@@ -267,6 +297,10 @@ load();
 
 // ─── Calculs ─────────────────────────────────────────────────────────────
 const cust = id => db.customers.find(c => c.id === id);
+const lastM = c => (c.hist && c.hist[0]) || null;
+const fmtCm = v => String(v).replace(".", ",");
+const parseCm = v => { const n = parseFloat(String(v).replace(",", ".").replace(/[^\d.]/g, "")); return isNaN(n) ? null : Math.round(n * 10) / 10; };
+const mCount = e => e ? Object.keys(e.values).length : 0;
 const stepIdx = s => STEPS.findIndex(x => x[0] === s);
 const total = o => o.items.reduce((a, i) => a + i.price, 0);
 const paid = o => o.payments.reduce((a, p) => a + p.amount, 0);
@@ -310,6 +344,7 @@ function render() {
   if (ui.view === "home") renderHome();
   else if (ui.view === "new") renderNew();
   else if (ui.view === "order") renderOrder();
+  else if (ui.view === "measure") renderMeasure();
 }
 
 // ─── Écran 1 : Accueil ───────────────────────────────────────────────────
@@ -387,10 +422,12 @@ function renderNew() {
   $screen.innerHTML = `
     <div class="bar"><button class="iconbtn" data-act="home" aria-label="Retour">←</button><h2>Nouvelle commande</h2></div>
     <div class="section"><h3>Client</h3>
-      ${c ? `<div class="selected"><div><b>${esc(c.name)}</b><small>${esc(c.phone)} · mesures du ${shortDate(c.mDate)}</small></div><button class="soft" data-act="unpick">Changer</button></div>`
+      ${c ? `<div class="selected"><div><b>${esc(c.name)}</b><small>${esc(c.phone)}</small></div><button class="soft" data-act="unpick">Changer</button></div>
+          <div class="msummary"><span>${lastM(c) ? `Mesures du ${shortDate(lastM(c).date)} · ${mCount(lastM(c))} mesures` : "Aucune mesure enregistrée"}</span><button class="soft" data-act="measure-new" data-from="new">${lastM(c) ? "Mettre à jour" : "Prendre les mesures"}</button></div>`
         : d.newCust ? `<div class="card">
             <div class="field"><label for="nc-name">Nom du client</label><input class="input" id="nc-name" data-bind="nc-name" value="${esc(d.newCust.name)}" placeholder="Ex. Mariama Diallo" autocomplete="off"></div>
             <div class="field"><label for="nc-phone">Téléphone WhatsApp</label><input class="input" id="nc-phone" data-bind="nc-phone" value="${esc(d.newCust.phone)}" inputmode="tel" placeholder="77 123 45 67"></div>
+            <div class="msummary"><span>${d.newCust.hist ? `Mesures prises · ${mCount(d.newCust.hist[0])} mesures` : "Mesures pas encore prises"}</span><button class="soft" data-act="measure-new" data-from="new">${d.newCust.hist ? "Modifier" : "Prendre les mesures"}</button></div>
             <button class="soft" data-act="cancel-new">Choisir un client existant</button></div>`
         : `<div class="field"><label for="cust-q">Chercher par nom ou téléphone</label><input class="input" id="cust-q" data-bind="query" value="${esc(d.query)}" placeholder="Ex. Awa ou 77 000" autocomplete="off"></div>
            <div class="results" id="results">${resultsHtml(matches, q)}</div>
@@ -442,7 +479,7 @@ function saveDraft() {
   let cid = d.customer;
   if (!cid) {
     cid = "c" + Date.now();
-    db.customers.push({ id: cid, name: d.newCust.name.trim(), phone: d.newCust.phone.trim() || "Pas de numéro", tpl: "F", m: {}, mDate: day(0) });
+    db.customers.push({ id: cid, name: d.newCust.name.trim(), phone: d.newCust.phone.trim() || "Pas de numéro", tpl: d.newCust.tpl || "F", hist: d.newCust.hist || [] });
   }
   const o = { id: "o" + Date.now(), num: db.nextNum++, customer: cid, due: d.due, created: day(0),
     items: d.items.map(i => ({ ...i })), payments: [] };
@@ -536,14 +573,84 @@ function cashSheet(o) {
     <div class="pick" role="group" aria-label="Moyen de paiement" id="cash-methods">${Object.entries(METHODS).map(([k, l], j) => `<button data-act="cash-method" data-v="${k}" aria-pressed="${j === 1}">${l}</button>`).join("")}</div>
     <button class="primary" data-act="cash-ok">Enregistrer le paiement</button>`);
 }
-function measuresSheet(o) {
-  const c = cust(o.customer), entries = Object.entries(c.m);
+function measuresSheet(o, idx = 0) {
+  const c = cust(o.customer), h = c.hist || [], e = h[idx], prev = h[idx + 1];
   openSheet(`
     <h3>Mesures de ${esc(firstName(c.name))}</h3>
-    <p>Fiche ${c.tpl === "H" ? "homme" : "femme"} · prises le ${shortDate(c.mDate)}</p>
-    ${entries.length ? `<div class="measures">${entries.map(([k, v]) => `<div><span>${esc(k)}</span><b>${v} cm</b></div>`).join("")}</div>` : `<p class="hint">Aucune mesure prise pour ce nouveau client.</p>`}
-    <button class="soft" data-act="soon" data-what="La prise de mesures">Prendre de nouvelles mesures</button>`);
+    ${e ? `<p>Fiche ${TEMPLATES[e.tpl].label.toLowerCase()} · prises le ${shortDate(e.date)}</p>
+      ${h.length > 1 ? `<div class="mhist" role="group" aria-label="Historique">${h.map((x, j) => `<button data-act="m-hist" data-i="${j}" aria-pressed="${j === idx}">${shortDate(x.date)}</button>`).join("")}</div>` : ""}
+      <div class="measures">${Object.entries(e.values).map(([k, v]) => {
+        const p = prev && prev.values[k], d = p != null ? Math.round((v - p) * 10) / 10 : 0;
+        return `<div><span>${esc(k)}</span><b>${fmtCm(v)} cm${d ? `<span class="diff">${d > 0 ? "+" : ""}${fmtCm(d)}</span>` : ""}</b></div>`; }).join("")}</div>
+      ${e.notes ? `<p><b>Observations :</b> ${esc(e.notes)}</p>` : ""}`
+    : `<p class="hint">Aucune mesure enregistrée pour ce client.</p>`}
+    <button class="primary" data-act="measure-new" data-from="order">Prendre de nouvelles mesures</button>`);
 }
+
+// ─── Écran : prise de mesures ────────────────────────────────────────────
+function startMeasure(from) {
+  let name, base;
+  if (from === "new" && !ui.draft.customer) { name = ui.draft.newCust.name.trim() || "Nouveau client"; base = ui.draft.newCust.hist?.[0] || null; }
+  else { const c = cust(from === "new" ? ui.draft.customer : db.orders.find(x => x.id === ui.orderId).customer); name = c.name; base = lastM(c); }
+  const prior = from === "new" && !ui.draft.customer ? null : base;
+  const tpl = base?.tpl || (from === "new" && !ui.draft.customer ? ui.draft.newCust.tpl : null) || "F";
+  const extra = base ? Object.keys(base.values).filter(k => !TEMPLATES[base.tpl].fields.includes(k)) : [];
+  // On part des dernières mesures : le tailleur ne corrige que ce qui a changé.
+  const values = base ? { ...base.values } : {};
+  ui.measure = { from, name, prior, tpl, values, extra, notes: from === "new" && !ui.draft.customer && base ? base.notes : "", adding: false, dirty: false, leaveArmed: false };
+  ui.view = "measure"; closeSheet(); render(); $screen.scrollTop = 0;
+}
+function mFields() { const m = ui.measure; return [...TEMPLATES[m.tpl].fields, ...m.extra.filter(k => !TEMPLATES[m.tpl].fields.includes(k))]; }
+function mNote(v, p) { return mBad(v) ? `Vérifiez : entre ${M_MIN} et ${M_MAX} cm` : p != null && v !== p ? `Avant : ${fmtCm(p)} cm` : ""; }
+function mBad(v) { return v != null && (v < M_MIN || v > M_MAX); }
+function renderMeasure() {
+  const m = ui.measure, fields = mFields();
+  $screen.className = "screen with-footer";
+  $screen.innerHTML = `
+    <div class="bar"><button class="iconbtn" data-act="m-back" aria-label="Retour">←</button><h2>Mesures</h2></div>
+    <div class="section">
+      <div class="selected"><div><b>${esc(m.name)}</b><small>${m.prior ? `Reprise des mesures du ${shortDate(m.prior.date)}. Corrigez ce qui a changé.` : "Première prise de mesures"}</small></div></div>
+      <div class="pick" role="group" aria-label="Type de fiche">${Object.entries(TEMPLATES).map(([k, t]) => `<button data-act="m-tpl" data-v="${k}" aria-pressed="${m.tpl === k}">${t.label}</button>`).join("")}</div>
+    </div>
+    <div class="section"><h3>En centimètres · <span id="m-count"></span></h3>
+      <div class="mlist">${fields.map((f, j) => {
+        const v = m.values[f], p = m.prior?.values[f];
+        return `<label class="mrow ${v != null ? "filled" : ""} ${mBad(v) ? "bad" : ""}" for="m-${j}" data-row="${j}">
+          <span>${esc(f)}<small id="m-note-${j}">${mNote(v, p)}</small></span>
+          <span class="mbox"><input class="minput" id="m-${j}" data-mk="${esc(f)}" data-j="${j}" inputmode="decimal" enterkeyhint="${j < fields.length - 1 ? "next" : "done"}" autocomplete="off" value="${v != null ? fmtCm(v) : ""}" placeholder="${p != null ? fmtCm(p) : "–"}"><em>cm</em></span>
+        </label>`; }).join("")}</div>
+      ${m.adding
+        ? `<div class="addrow"><input class="input" id="m-new-label" placeholder="Ex. Tour de genou" autocomplete="off"><button class="soft" data-act="m-add-ok">Ajouter</button></div>`
+        : `<button class="ghost" data-act="m-add">+ Ajouter une mesure</button>`}
+    </div>
+    <div class="section"><h3>Observations</h3>
+      <textarea class="input textarea" id="m-notes" data-mnotes="1" placeholder="Ex. épaule gauche plus basse, aime les coupes ajustées">${esc(m.notes)}</textarea>
+    </div>`;
+  $chrome.innerHTML = `<div class="footer"><button class="primary" data-act="m-save" id="m-save">Enregistrer les mesures</button><p class="hint" id="m-hint"></p></div>`;
+  mUpdate();
+}
+function mUpdate() {
+  const m = ui.measure, fields = mFields();
+  const filled = fields.filter(f => m.values[f] != null).length, bad = fields.filter(f => mBad(m.values[f])).length;
+  document.getElementById("m-count").textContent = `${filled} / ${fields.length} remplies`;
+  document.getElementById("m-save").disabled = !filled || bad > 0;
+  document.getElementById("m-hint").textContent = bad ? `${bad} mesure${bad > 1 ? "s" : ""} à vérifier.` : filled ? "Les cases vides ne seront pas enregistrées." : "Remplissez au moins une mesure.";
+}
+function mSave() {
+  const m = ui.measure, fields = mFields(), values = {};
+  fields.forEach(f => { if (m.values[f] != null) values[f] = m.values[f]; });
+  if (!Object.keys(values).length || Object.values(values).some(mBad)) return;
+  const entry = { date: day(0), tpl: m.tpl, values, notes: m.notes.trim() };
+  if (m.from === "new" && !ui.draft.customer) { ui.draft.newCust.hist = [entry]; ui.draft.newCust.tpl = m.tpl; }
+  else {
+    const c = cust(m.from === "new" ? ui.draft.customer : db.orders.find(x => x.id === ui.orderId).customer);
+    c.hist = [entry, ...(c.hist || [])]; c.tpl = m.tpl; save();
+  }
+  const back = m.from === "new" ? "new" : "order";
+  ui.measure = null; go(back);
+  toast(`${Object.keys(values).length} mesures enregistrées`);
+}
+
 function receiptSheet(o) {
   const c = cust(o.customer);
   openSheet(`
@@ -588,6 +695,24 @@ document.getElementById("device").addEventListener("click", e => {
     case "advance": return advance(o, i);
     case "wa": return waSheet(o, b.dataset.v);
     case "measures": return measuresSheet(o);
+    case "m-hist": return measuresSheet(o, i);
+    case "measure-new": return startMeasure(b.dataset.from);
+    case "m-tpl": ui.measure.tpl = b.dataset.v; ui.measure.dirty = true; return renderMeasure();
+    case "m-add": ui.measure.adding = true; renderMeasure(); return document.getElementById("m-new-label").focus();
+    case "m-add-ok": {
+      const l = document.getElementById("m-new-label").value.trim();
+      ui.measure.adding = false;
+      if (l && !mFields().includes(l)) { ui.measure.extra.push(l); ui.measure.dirty = true; }
+      renderMeasure();
+      const inp = document.querySelector(`[data-mk="${CSS.escape(l)}"]`); if (inp) inp.focus();
+      return;
+    }
+    case "m-save": b.disabled = true; return mSave();
+    case "m-back": {
+      const m = ui.measure;
+      if (m.dirty && !m.leaveArmed) { m.leaveArmed = true; return toast("Mesures non enregistrées. Appuyez encore sur ← pour quitter."); }
+      const back = m.from === "new" ? "new" : "order"; ui.measure = null; return go(back);
+    }
     case "receipt": return receiptSheet(o);
     case "cash": return cashSheet(o);
     case "cash-method": document.querySelectorAll("#cash-methods button").forEach(x => x.setAttribute("aria-pressed", x === b)); return;
@@ -607,6 +732,16 @@ document.getElementById("device").addEventListener("click", e => {
 });
 document.getElementById("device").addEventListener("input", e => {
   const el = e.target, d = ui.draft;
+  if (ui.view === "measure") {
+    const m = ui.measure; m.dirty = true; m.leaveArmed = false;
+    if (el.dataset.mnotes) { m.notes = el.value; return; }
+    if (el.dataset.mk === undefined) return;
+    const v = parseCm(el.value), j = el.dataset.j, row = el.closest(".mrow"), p = m.prior?.values[el.dataset.mk];
+    if (v == null) delete m.values[el.dataset.mk]; else m.values[el.dataset.mk] = v;
+    row.classList.toggle("filled", v != null); row.classList.toggle("bad", mBad(v));
+    document.getElementById("m-note-" + j).textContent = mNote(v, p);
+    return mUpdate();
+  }
   if (!d || !el.dataset.bind) return;
   const k = el.dataset.bind;
   if (k === "query") { d.query = el.value; const q = el.value.trim().toLowerCase();
@@ -625,6 +760,12 @@ document.getElementById("device").addEventListener("change", e => {
   const n = +el.dataset.photo, r = new FileReader();
   r.onload = () => { ui.draft.items[n].photo = r.result; renderNew(); };
   r.readAsDataURL(el.files[0]);
+});
+document.getElementById("device").addEventListener("keydown", e => {
+  if (e.key !== "Enter" || e.target.dataset.mk === undefined) return;
+  e.preventDefault();
+  const next = document.getElementById("m-" + (+e.target.dataset.j + 1));
+  if (next) next.focus(); else e.target.blur();
 });
 document.getElementById("reset-demo").addEventListener("click", () => { db = seed(); save(); go("home", { filter: "avenir" }); toast("Maquette remise à zéro"); });
 
