@@ -157,7 +157,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .pay { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); gap: 8px }
 .pay b { color: var(--ink); font-variant-numeric: tabular-nums; font-weight: 600 }
 .restline { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid var(--line); padding-top: 10px }
-.restline b { font: 800 22px var(--f-display); font-variant-numeric: tabular-nums }
+.restline b { font: 800 20px var(--f-display); font-variant-numeric: tabular-nums; white-space: nowrap }
 .restline b.zero { color: var(--ok) }
 .restline b.due { color: var(--warn) }
 
@@ -180,6 +180,18 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
 .receipt .ln b { font-variant-numeric: tabular-nums }
 .receipt .tot { border-top: 1px dashed var(--line); padding-top: 6px }
 .receipt .foot { text-align: center; font: 500 11px var(--f-mono); color: var(--muted); padding-top: 6px }
+
+/* Clients */
+.crow { display: grid; grid-template-columns: 40px 1fr auto; gap: 2px 12px; align-items: center; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px }
+.crow .avatar { grid-row: span 2; width: 40px; height: 40px }
+.crow b { font-size: 15px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap }
+.crow small { color: var(--muted); font-size: 12.5px; grid-column: 2 }
+.crow .mtag { grid-row: span 2; font: 500 11px var(--f-mono); padding: 4px 8px; border-radius: 99px; background: var(--indigo-soft); color: var(--indigo); white-space: nowrap }
+.crow .mtag.none { background: var(--warn-soft); color: var(--warn) }
+.mcard { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+.mcard div { min-width: 0 }
+.mcard small { display: block; color: var(--muted) }
+.mcard .btns { display: flex; gap: 6px; flex: none }
 
 /* Prise de mesures */
 .mlist { display: grid; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden }
@@ -225,7 +237,7 @@ button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid 
       <li><b>Accueil</b> : « Quelles tenues devez-vous livrer aujourd'hui ? »</li>
       <li><b>Nouvelle commande</b> : « Enregistrez la commande d'une cliente qui veut deux tenues pour la Tabaski. »</li>
       <li><b>Détail</b> : « La tenue est prête : prévenez la cliente et encaissez le solde. »</li>
-      <li><b>Mesures</b> : « Prenez les mesures de cette cliente avec votre mètre ruban, directement dans le téléphone. »</li>
+      <li><b>Mesures</b> (onglet Clients, ou bloc Mesures d'une commande) : « Prenez les mesures de cette cliente avec votre mètre ruban, directement dans le téléphone. »</li>
     </ol>
     <p>Notez où le tailleur hésite, ce qu'il cherche sans le trouver, et les mots qu'il emploie.</p>
     <p><button class="linkbtn" id="reset-demo" type="button">Remettre la maquette à zéro</button></p>
@@ -345,6 +357,7 @@ function render() {
   else if (ui.view === "new") renderNew();
   else if (ui.view === "order") renderOrder();
   else if (ui.view === "measure") renderMeasure();
+  else if (ui.view === "clients") renderClients();
 }
 
 // ─── Écran 1 : Accueil ───────────────────────────────────────────────────
@@ -391,12 +404,36 @@ function renderHome() {
     </div>`;
   $chrome.innerHTML = `
     <button class="fab" data-act="new">+ Nouvelle commande</button>
-    <nav class="nav" aria-label="Navigation">
-      <button aria-current="page"><span>⌂</span>Accueil</button>
+    ${navHtml("home")}`;
+}
+
+// ─── Écran : Clients ─────────────────────────────────────────────────────
+function navHtml(active) {
+  return `<nav class="nav" aria-label="Navigation">
+      <button data-act="home" ${active === "home" ? 'aria-current="page"' : ""}><span>⌂</span>Accueil</button>
       <button data-act="soon" data-what="La liste complète des commandes"><span>☰</span>Commandes</button>
-      <button data-act="soon" data-what="L'écran Clients"><span>☺</span>Clients</button>
+      <button data-act="clients" ${active === "clients" ? 'aria-current="page"' : ""}><span>☺</span>Clients</button>
       <button data-act="more"><span>⋯</span>Plus</button>
     </nav>`;
+}
+function clientRows(q) {
+  const list = db.customers.filter(x => !q || x.name.toLowerCase().includes(q) || x.phone.replace(/\s/g, "").includes(q.replace(/\s/g, "")))
+    .sort((a, b) => a.name.localeCompare(b.name, "fr"));
+  return list.length ? list.map(c => `<button class="crow" data-act="client-open" data-v="${c.id}">
+      <span class="avatar" aria-hidden="true">${esc(c.name[0])}</span><b>${esc(c.name)}</b>
+      <span class="mtag ${lastM(c) ? "" : "none"}">${lastM(c) ? `📏 ${shortDate(lastM(c).date)}` : "Sans mesures"}</span>
+      <small>${esc(c.phone)}</small></button>`).join("")
+    : `<div class="empty"><b>Aucun client trouvé</b><span>Ajoutez-le avec « Nouveau client ».</span></div>`;
+}
+function renderClients() {
+  $screen.className = "screen";
+  $screen.innerHTML = `
+    <div class="top"><div><small>${db.customers.length} clients</small><h2>Clients et mesures</h2></div></div>
+    <div class="section">
+      <div class="field"><label for="cl-q">Chercher par nom ou téléphone</label><input class="input" id="cl-q" data-clq="1" placeholder="Ex. Awa ou 77 000" autocomplete="off"></div>
+      <div class="list" id="cl-list" style="padding:0">${clientRows("")}</div>
+    </div>`;
+  $chrome.innerHTML = `<button class="fab" data-act="client-new">+ Nouveau client et ses mesures</button>${navHtml("clients")}`;
 }
 
 // ─── Écran 2 : Nouvelle commande ─────────────────────────────────────────
@@ -502,8 +539,11 @@ function renderOrder() {
     <div class="client"><div class="avatar" aria-hidden="true">${esc(c.name[0])}</div><div><b>${esc(c.name)}</b><small>${esc(c.phone)}</small></div></div>
     <div class="btnrow">
       <button class="soft wa" data-act="wa" data-v="${st.key === "ready" ? "ready" : r ? "rappel" : "recap"}">WhatsApp</button>
-      <button class="soft" data-act="measures">Mesures</button>
       <button class="soft" data-act="receipt">Reçu</button>
+    </div>
+    <div class="section"><h3>Mesures</h3>
+      <div class="card mcard"><div><b>${lastM(c) ? `${mCount(lastM(c))} mesures · fiche ${TEMPLATES[lastM(c).tpl].label.toLowerCase()}` : "Aucune mesure"}</b><small>${lastM(c) ? `Prises le ${shortDate(lastM(c).date)}` : "Prenez-les avec le mètre ruban"}</small></div>
+        <div class="btns">${lastM(c) ? `<button class="soft" data-act="measures">Voir</button>` : ""}<button class="advance" data-act="measure-new" data-from="order">📏 ${lastM(c) ? "Reprendre" : "Prendre"}</button></div></div>
     </div>
     <div class="meta"><span>Livraison <strong>${shortDate(o.due)}</strong></span><span>${dueLabel(o)}</span></div>
     <div class="section"><h3>Tenues · ${o.items.length}</h3>
@@ -573,8 +613,9 @@ function cashSheet(o) {
     <div class="pick" role="group" aria-label="Moyen de paiement" id="cash-methods">${Object.entries(METHODS).map(([k, l], j) => `<button data-act="cash-method" data-v="${k}" aria-pressed="${j === 1}">${l}</button>`).join("")}</div>
     <button class="primary" data-act="cash-ok">Enregistrer le paiement</button>`);
 }
-function measuresSheet(o, idx = 0) {
-  const c = cust(o.customer), h = c.hist || [], e = h[idx], prev = h[idx + 1];
+function measuresSheet(cid, from, idx = 0) {
+  ui.sheetCtx = { cid, from };
+  const c = cust(cid), h = c.hist || [], e = h[idx], prev = h[idx + 1];
   openSheet(`
     <h3>Mesures de ${esc(firstName(c.name))}</h3>
     ${e ? `<p>Fiche ${TEMPLATES[e.tpl].label.toLowerCase()} · prises le ${shortDate(e.date)}</p>
@@ -584,20 +625,26 @@ function measuresSheet(o, idx = 0) {
         return `<div><span>${esc(k)}</span><b>${fmtCm(v)} cm${d ? `<span class="diff">${d > 0 ? "+" : ""}${fmtCm(d)}</span>` : ""}</b></div>`; }).join("")}</div>
       ${e.notes ? `<p><b>Observations :</b> ${esc(e.notes)}</p>` : ""}`
     : `<p class="hint">Aucune mesure enregistrée pour ce client.</p>`}
-    <button class="primary" data-act="measure-new" data-from="order">Prendre de nouvelles mesures</button>`);
+    <button class="primary" data-act="measure-new" data-from="${from}" data-cid="${cid}">📏 ${e ? "Prendre de nouvelles mesures" : "Prendre les mesures"}</button>`);
 }
 
 // ─── Écran : prise de mesures ────────────────────────────────────────────
-function startMeasure(from) {
+function measureCid(from, cid) {
+  if (from === "new") return ui.draft.customer;
+  if (from === "order") return db.orders.find(x => x.id === ui.orderId).customer;
+  return cid;
+}
+function startMeasure(from, cid) {
   let name, base;
-  if (from === "new" && !ui.draft.customer) { name = ui.draft.newCust.name.trim() || "Nouveau client"; base = ui.draft.newCust.hist?.[0] || null; }
-  else { const c = cust(from === "new" ? ui.draft.customer : db.orders.find(x => x.id === ui.orderId).customer); name = c.name; base = lastM(c); }
+  cid = measureCid(from, cid);
+  if (from === "new" && !cid) { name = ui.draft.newCust.name.trim() || "Nouveau client"; base = ui.draft.newCust.hist?.[0] || null; }
+  else { const c = cust(cid); name = c.name; base = lastM(c); }
   const prior = from === "new" && !ui.draft.customer ? null : base;
   const tpl = base?.tpl || (from === "new" && !ui.draft.customer ? ui.draft.newCust.tpl : null) || "F";
   const extra = base ? Object.keys(base.values).filter(k => !TEMPLATES[base.tpl].fields.includes(k)) : [];
   // On part des dernières mesures : le tailleur ne corrige que ce qui a changé.
   const values = base ? { ...base.values } : {};
-  ui.measure = { from, name, prior, tpl, values, extra, notes: from === "new" && !ui.draft.customer && base ? base.notes : "", adding: false, dirty: false, leaveArmed: false };
+  ui.measure = { from, cid, name, prior, tpl, values, extra, notes: from === "new" && !ui.draft.customer && base ? base.notes : "", adding: false, dirty: false, leaveArmed: false };
   ui.view = "measure"; closeSheet(); render(); $screen.scrollTop = 0;
 }
 function mFields() { const m = ui.measure; return [...TEMPLATES[m.tpl].fields, ...m.extra.filter(k => !TEMPLATES[m.tpl].fields.includes(k))]; }
@@ -643,12 +690,12 @@ function mSave() {
   const entry = { date: day(0), tpl: m.tpl, values, notes: m.notes.trim() };
   if (m.from === "new" && !ui.draft.customer) { ui.draft.newCust.hist = [entry]; ui.draft.newCust.tpl = m.tpl; }
   else {
-    const c = cust(m.from === "new" ? ui.draft.customer : db.orders.find(x => x.id === ui.orderId).customer);
+    const c = cust(m.cid);
     c.hist = [entry, ...(c.hist || [])]; c.tpl = m.tpl; save();
   }
-  const back = m.from === "new" ? "new" : "order";
+  const back = m.from === "new" ? "new" : m.from === "order" ? "order" : "clients";
   ui.measure = null; go(back);
-  toast(`${Object.keys(values).length} mesures enregistrées`);
+  { const n = Object.keys(values).length; toast(`${n} mesure${n > 1 ? "s" : ""} enregistrée${n > 1 ? "s" : ""}`); }
 }
 
 function receiptSheet(o) {
@@ -694,9 +741,22 @@ document.getElementById("device").addEventListener("click", e => {
     case "save": b.disabled = true; return saveDraft();
     case "advance": return advance(o, i);
     case "wa": return waSheet(o, b.dataset.v);
-    case "measures": return measuresSheet(o);
-    case "m-hist": return measuresSheet(o, i);
-    case "measure-new": return startMeasure(b.dataset.from);
+    case "measures": return measuresSheet(o.customer, "order");
+    case "m-hist": return measuresSheet(ui.sheetCtx.cid, ui.sheetCtx.from, i);
+    case "measure-new": return startMeasure(b.dataset.from, b.dataset.cid);
+    case "clients": return go("clients");
+    case "client-open": return measuresSheet(b.dataset.v, "client");
+    case "client-new": return openSheet(`<h3>Nouveau client</h3>
+      <div class="field"><label for="cn-name">Nom</label><input class="input" id="cn-name" placeholder="Ex. Mariama Diallo" autocomplete="off"></div>
+      <div class="field"><label for="cn-phone">Téléphone WhatsApp</label><input class="input" id="cn-phone" inputmode="tel" placeholder="77 123 45 67"></div>
+      <button class="primary" data-act="client-create">📏 Créer et prendre les mesures</button>`);
+    case "client-create": {
+      const name = document.getElementById("cn-name").value.trim();
+      if (!name) return toast("Indiquez le nom du client");
+      const c = { id: "c" + Date.now(), name, phone: document.getElementById("cn-phone").value.trim() || "Pas de numéro", tpl: "F", hist: [] };
+      db.customers.push(c); save();
+      return startMeasure("client", c.id);
+    }
     case "m-tpl": ui.measure.tpl = b.dataset.v; ui.measure.dirty = true; return renderMeasure();
     case "m-add": ui.measure.adding = true; renderMeasure(); return document.getElementById("m-new-label").focus();
     case "m-add-ok": {
@@ -711,7 +771,7 @@ document.getElementById("device").addEventListener("click", e => {
     case "m-back": {
       const m = ui.measure;
       if (m.dirty && !m.leaveArmed) { m.leaveArmed = true; return toast("Mesures non enregistrées. Appuyez encore sur ← pour quitter."); }
-      const back = m.from === "new" ? "new" : "order"; ui.measure = null; return go(back);
+      const back = m.from === "new" ? "new" : m.from === "order" ? "order" : "clients"; ui.measure = null; return go(back);
     }
     case "receipt": return receiptSheet(o);
     case "cash": return cashSheet(o);
@@ -732,6 +792,7 @@ document.getElementById("device").addEventListener("click", e => {
 });
 document.getElementById("device").addEventListener("input", e => {
   const el = e.target, d = ui.draft;
+  if (el.dataset.clq) { document.getElementById("cl-list").innerHTML = clientRows(el.value.trim().toLowerCase()); return; }
   if (ui.view === "measure") {
     const m = ui.measure; m.dirty = true; m.leaveArmed = false;
     if (el.dataset.mnotes) { m.notes = el.value; return; }
