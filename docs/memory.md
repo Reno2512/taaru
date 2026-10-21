@@ -16,6 +16,7 @@ Fichier tenu à jour par l'agent après chaque étape validée.
 - Projet Supabase de dev : `https://isjrefitnmugfaajvxni.supabase.co` (clé publishable dans `.env.local`, non commité). **Migration pas encore appliquée** : l'environnement cloud de l'agent ne peut pas joindre supabase.co.
 
 ## Décisions
+- Dépôt GitHub public depuis le 21/10/2026 : en privé, tous les runs Actions échouaient au démarrage (`startup_failure`, compte GitHub sans minutes Actions utilisables). Le code passait lint, typecheck, tests, build et RLS en local. La CI peut aussi se lancer à la main (`workflow_dispatch`).
 - Stack : Next.js + Supabase + Vercel (voie rapide).
 - Multi-atelier dès le départ : toutes les données portent `atelier_id`.
 - Montants en FCFA entiers. Une commande contient une ou plusieurs tenues, chacune avec son statut.
