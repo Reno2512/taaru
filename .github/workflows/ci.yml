@@ -4,6 +4,8 @@ on:
   push:
     branches: [main]
   pull_request:
+  # Bouton « Run workflow » dans l'onglet Actions
+  workflow_dispatch:
 
 jobs:
   app:
